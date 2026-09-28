@@ -1,0 +1,371 @@
+{
+  "insideTitan:titan-yard": 0,
+  "insideTitan:titan-turn": 0,
+  "insideTitan:titan-grab": 0,
+  "insideTitan:nape-kill": 0,
+  "titan": {
+    "walk": {
+      "id": 1,
+      "brain": "wander",
+      "alive": true,
+      "sees": false,
+      "pose": {
+        "x": -2.4331151657609915,
+        "z": -44.367272895466535,
+        "yaw": 0.5067143244389775,
+        "h": 12,
+        "gait": 3.739645602590816,
+        "stride": 0.6410256410256411,
+        "lookYaw": 0,
+        "lookPitch": 0,
+        "lean": 0,
+        "action": "none",
+        "actionT": 0,
+        "arm": "R",
+        "target": [
+          0,
+          0,
+          0
+        ]
+      },
+      "nape": [
+        -2.162009817775098,
+        8.989570462340504,
+        -43.952465531143204
+      ]
+    },
+    "turn": [
+      {
+        "id": 1,
+        "brain": "notice",
+        "alive": true,
+        "sees": true,
+        "pose": {
+          "x": 0,
+          "z": 0,
+          "yaw": 0.35633805561550885,
+          "h": 12,
+          "gait": 0,
+          "stride": 0,
+          "lookYaw": 0.6084860367350349,
+          "lookPitch": -0.23451968881847088,
+          "lean": 0,
+          "action": "none",
+          "actionT": 0,
+          "arm": "R",
+          "target": [
+            0,
+            0,
+            0
+          ]
+        },
+        "nape": [
+          0.16076786035068186,
+          9.01260571685965,
+          0.4319071566299347
+        ]
+      },
+      {
+        "id": 1,
+        "brain": "chase",
+        "alive": true,
+        "sees": true,
+        "pose": {
+          "x": -4.745481240968205,
+          "z": -3.2510145490478157,
+          "yaw": 1.0008506267431596,
+          "h": 12,
+          "gait": 4.312174448113,
+          "stride": 1,
+          "lookYaw": -0.04011192207145975,
+          "lookPitch": -0.26884162344365226,
+          "lean": 0.14,
+          "action": "none",
+          "actionT": 0,
+          "arm": "R",
+          "target": [
+            0,
+            0,
+            0
+          ]
+        },
+        "nape": [
+          -4.712347275162087,
+          9.017788987770471,
+          -3.3397603295464897
+        ]
+      }
+    ],
+    "windup": {
+      "id": 1,
+      "brain": "windup",
+      "alive": true,
+      "sees": true,
+      "pose": {
+        "x": 80.97743599592266,
+        "z": -30.572601442503814,
+        "yaw": 0.17566219487436185,
+        "h": 12,
+        "gait": 16.01789651819967,
+        "stride": 0,
+        "lookYaw": -0.03722637266189577,
+        "lookPitch": -0.07666297799149321,
+        "lean": 0,
+        "action": "windup",
+        "actionT": 0.6309523809523818,
+        "arm": "R",
+        "target": [
+          79.66479517526089,
+          8.6084673976028,
+          -38.8980052728793
+        ]
+      },
+      "nape": [
+        80.76440817637186,
+        8.790633526600667,
+        -31.77281501765451
+      ]
+    },
+    "hold": {
+      "id": 1,
+      "brain": "hold",
+      "alive": true,
+      "sees": false,
+      "pose": {
+        "x": 80.97743599592266,
+        "z": -30.572601442503814,
+        "yaw": 0.15637959863479975,
+        "h": 12,
+        "gait": 16.01789651819967,
+        "stride": 0,
+        "lookYaw": -0.037589067441967355,
+        "lookPitch": -0.09084776114421289,
+        "lean": 0,
+        "action": "hold",
+        "actionT": 1,
+        "arm": "R",
+        "target": [
+          79.93680958105904,
+          7.491564658740362,
+          -37.41117619927168
+        ]
+      },
+      "nape": [
+        80.79796939579495,
+        8.81811978641671,
+        -31.710865540807912
+      ]
+    },
+    "collapse": {
+      "id": 1,
+      "brain": "collapse",
+      "alive": false,
+      "sees": false,
+      "pose": {
+        "x": 0,
+        "z": 0,
+        "yaw": 0,
+        "h": 12,
+        "gait": 0,
+        "stride": 0,
+        "lookYaw": 0,
+        "lookPitch": 0,
+        "lean": 0,
+        "action": "collapse",
+        "actionT": 0.5433333333333323,
+        "arm": "R",
+        "target": [
+          0,
+          0,
+          0
+        ]
+      },
+      "nape": [
+        -4.9876136600765604e-17,
+        8.290621307186441,
+        -3.7069934809621836
+      ]
+    },
+    "steam": 194
+  },
+  "insideTitan:body-slash": 0,
+  "insideTitan:grab-escape": 0,
+  "insideTitan:supply": 0,
+  "insideTitan:hook-titan": 0,
+  "hud": {
+    "hit": {
+      "blades": 0.92,
+      "kills": 0,
+      "grabShown": false,
+      "escape": 0,
+      "supplying": false,
+      "marker": {
+        "kind": "hit",
+        "at": 4796
+      },
+      "crosshair": "in"
+    },
+    "kill": {
+      "blades": 0.92,
+      "kills": 1,
+      "grabShown": false,
+      "escape": 0,
+      "supplying": false,
+      "marker": {
+        "kind": "kill",
+        "at": 5057.800000000745
+      },
+      "crosshair": "in"
+    },
+    "grab": [
+      {
+        "blades": 1,
+        "kills": 0,
+        "grabShown": true,
+        "escape": 0.32343749999999993,
+        "supplying": false,
+        "marker": {
+          "kind": "",
+          "at": 0
+        },
+        "crosshair": "assist"
+      },
+      {
+        "blades": 1,
+        "kills": 0,
+        "grabShown": true,
+        "escape": 0.7484374999999989,
+        "supplying": false,
+        "marker": {
+          "kind": "",
+          "at": 0
+        },
+        "crosshair": "assist"
+      }
+    ],
+    "supply": [
+      {
+        "blades": 0.2,
+        "kills": 0,
+        "grabShown": false,
+        "escape": 0,
+        "supplying": false,
+        "marker": {
+          "kind": "",
+          "at": 0
+        },
+        "crosshair": "out"
+      },
+      {
+        "blades": 0.6111111111111099,
+        "kills": 0,
+        "grabShown": false,
+        "escape": 0,
+        "supplying": true,
+        "marker": {
+          "kind": "",
+          "at": 0
+        },
+        "crosshair": "out"
+      },
+      {
+        "blades": 1,
+        "kills": 0,
+        "grabShown": false,
+        "escape": 0,
+        "supplying": false,
+        "marker": {
+          "kind": "",
+          "at": 0
+        },
+        "crosshair": "out"
+      }
+    ],
+    "crosshairOnTitan": "in"
+  },
+  "insideTitan:titan-approach": 0,
+  "footsteps": [
+    {
+      "distance": 60.31281573910245,
+      "shake": 0.02734556485687386
+    },
+    {
+      "distance": 56.63812730011584,
+      "shake": 0.03272419941419913
+    },
+    {
+      "distance": 48.583850195019096,
+      "shake": 0.04735930154057078
+    },
+    {
+      "distance": 44.1005147089774,
+      "shake": 0.05782180597855294
+    },
+    {
+      "distance": 36.18893151042246,
+      "shake": 0.08260823628118308
+    },
+    {
+      "distance": 32.981267023451664,
+      "shake": 0.09604565480560792
+    },
+    {
+      "distance": 25.634281590765486,
+      "shake": 0.13949574644001914
+    },
+    {
+      "distance": 21.483776920919436,
+      "shake": 0.17717819598192858
+    },
+    {
+      "distance": 15.769694474034095,
+      "shake": 0.2615082917011462
+    },
+    {
+      "distance": 13.288955023612889,
+      "shake": 0.32069675255411867
+    },
+    {
+      "distance": 13.288955023612889,
+      "shake": 0.32069675255411867
+    },
+    {
+      "distance": 13.288955023612889,
+      "shake": 0.32069675255411867
+    },
+    {
+      "distance": 13.288955023612889,
+      "shake": 0.32069675255411867
+    },
+    {
+      "distance": 13.288955023612889,
+      "shake": 0.32069675255411867
+    }
+  ],
+  "live": {
+    "crosshair": "in",
+    "hook": {
+      "state": "stowed",
+      "part": -1
+    },
+    "slash": 0,
+    "grabbed": false,
+    "escaped": false,
+    "mashMs": 3
+  },
+  "audio": {
+    "slash-swish": 3,
+    "blade-clang": 1,
+    "kill-thud": 2,
+    "steam-hiss": 2,
+    "titan-step": 50,
+    "grab-crunch": 3,
+    "release-whoosh": 3,
+    "titan-groan": 5,
+    "windup-rush": 3,
+    "titan-grunt": 1,
+    "collapse-rumble": 2,
+    "supply-clank": 1,
+    "supply-done": 1
+  }
+}

@@ -157,7 +157,38 @@ export const titanLoseInterest: Scenario = {
   ],
 };
 
+export const titanTurn: Scenario = {
+  name: 'titan-turn',
+  description: 'The player stands 40 m away, 55 degrees off the Titan\'s facing: it notices, turns and looks.',
+  ...yard,
+  spawn: { pos: [-40 * Math.sin(0.96), STAND, -40 * Math.cos(0.96)], yaw: Math.PI - 0.96 },
+  duration: 3,
+  titan: { at: [0, 0], yaw: 0, wander: false },
+  timeline: [],
+};
+
+export const titanApproach: Scenario = {
+  name: 'titan-approach',
+  description: 'A Titan 68 m away notices the player on a low roof and walks up: footsteps near and far.',
+  ...yard,
+  spawn: { pos: [31, 8 + STAND, -14], yaw: 0 },
+  duration: 16,
+  titan: { at: [31, 54], yaw: 0, wander: false },
+  timeline: [{ t: 0, aim: { yaw: Math.PI, pitch: 0.05 } }],
+};
+
 // ------------------------------------------------------------ grabs
+
+/** Standing at the edge of a low roof as a Titan walks up (live play: hook it, slash, get grabbed, mash). */
+export const grabLedge: Scenario = {
+  name: 'grab-ledge',
+  description: 'Standing at the edge of an 8 m roof, a Titan 33 m away walks up and grabs.',
+  ...yard,
+  spawn: { pos: [36.4, 8 + STAND, -14], yaw: -Math.PI / 2, pitch: 0 },
+  duration: 12,
+  titan: { at: [70, -14], yaw: Math.PI / 2, wander: false },
+  timeline: [],
+};
 
 const POLE_HOOK: [number, number, number] = [80.5, 11, -39];
 
@@ -393,6 +424,9 @@ export const titanScenarios: Scenario[] = [
   titanYard,
   titanStreet,
   titanNoticeSight,
+  titanTurn,
+  titanApproach,
+  grabLedge,
   titanHidden,
   titanNoise,
   titanChase,

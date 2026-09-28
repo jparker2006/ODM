@@ -65,6 +65,8 @@ export class Automation {
   /** Simulation times (s) at which to pause, for probes by the runner. */
   pauseTimes: number[] = [];
   errors: string[] = [];
+  /** How many times each simulation event has fired since boot (for live-play checks). */
+  eventCounts: Record<string, number> = {};
   tuningTable: (all: boolean) => string = () => '';
   private b: Bindings | null = null;
 

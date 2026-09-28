@@ -122,7 +122,8 @@ export class Game {
       this.renderer.scene.add(this.titanMesh.group);
     }
 
-    this.input = new Input(this.renderer.renderer.domElement, this.tuning, spawn.yaw, spawn.pitch ?? 0);
+    const fakeLock = new URLSearchParams(location.search).get('nolock') === '1';
+    this.input = new Input(this.renderer.renderer.domElement, this.tuning, spawn.yaw, spawn.pitch ?? 0, fakeLock);
     this.panel = new TuningPanel(this.tuning);
     this.input.onToggleOverlay = () => this.perf.toggle();
     this.input.onTogglePanel = () => {
@@ -225,6 +226,8 @@ export class Game {
     this.sim.step(intent);
     if (this.sim.events.some((e) => e.type === 'reset')) this.rig.snap();
     this.pendingEvents.push(...this.sim.events);
+    const counts = this.cfg.automation.eventCounts;
+    for (const e of this.sim.events) counts[e.type] = (counts[e.type] ?? 0) + 1;
   }
 
   private frame(now: number): void {

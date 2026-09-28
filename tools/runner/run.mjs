@@ -147,6 +147,7 @@ async function perf() {
       categories: ['devtools.timeline', 'disabled-by-default-devtools.timeline', 'v8', 'v8.gc', 'gpu', 'viz', 'blink'],
     });
   }
+  const loadStart = loadavg().map((v) => +v.toFixed(2));
   await page.evaluate(() => window.__odm.start());
   const t0 = Date.now();
   await waitState(page, ['done', 'error'], 600000);
@@ -177,7 +178,9 @@ async function perf() {
   const result = {
     date: new Date().toISOString(),
     machine: `MacBook Air M4 16 GB, Google Chrome, ${uncapped ? 'vsync and frame-rate limit off' : 'vsync on'}`,
-    // System load (1, 5, 15 min) at the end of the run: other work on the laptop causes stalls.
+    // System load (1, 5, 15 min) at the start and end of the run: other work on the laptop causes
+    // stalls, so a result only counts when the 1-minute load stays under about 10.
+    loadAverageStart: loadStart,
     loadAverage: loadavg().map((v) => +v.toFixed(2)),
     viewport: `${VIEWPORT.width}x${VIEWPORT.height} @${DPR}x`,
     adapter,
@@ -202,7 +205,10 @@ async function perf() {
     consoleIssues: logs,
   };
   mkdirSync(resolve(EVIDENCE, 'perf'), { recursive: true });
-  writeFileSync(resolve(EVIDENCE, 'perf', 'perf.json'), JSON.stringify(result, null, 2));
+  const suffix = uncapped ? '' : '-vsync';
+  writeFileSync(resolve(EVIDENCE, 'perf', `perf${suffix}.json`), JSON.stringify(result, null, 2));
+  const quiet = Math.max(loadStart[0], result.loadAverage[0]) < 10;
+  (quiet ? pass : fail)(`perf: load average ${loadStart[0]} at start, ${result.loadAverage[0]} at end (must stay under about 10)`);
   const line = `avg ${result.avgFps} fps, 1% low ${result.onePercentLowFps} fps, max frame ${result.maxFrameMs} ms, min render scale ${result.minRenderScale}`;
   if (avgFps < 60) fail(`perf: average ${avgFps.toFixed(1)} fps < 60 (${line})`);
   if (low1 < 45) fail(`perf: 1% low ${low1.toFixed(1)} fps < 45 (${line})`);
@@ -304,6 +310,10 @@ try {
     else if (c === 'features') {
       const { features } = await import('./features.mjs');
       await features(await getBrowser(), { openPage, waitState, runToDone, pass, fail, EVIDENCE, ROOT });
+    } else if (c === 'features-m2') {
+      const { featuresM2 } = await import('./features-m2.mjs');
+      const r = await featuresM2(await getBrowser(), { openPage, waitState, runToDone, pass, fail, EVIDENCE, ROOT });
+      writeFileSync(resolve(EVIDENCE, 'features', 'features-m2.json'), JSON.stringify(r, null, 2));
     } else throw new Error(`unknown command ${c}`);
   }
 } catch (e) {

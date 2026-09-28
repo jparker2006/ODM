@@ -35,7 +35,7 @@
       "t": 3.2,
       "want": "run",
       "got": "run",
-      "fov": 60.000078137279715,
+      "fov": 60.00017389771405,
       "speed": 8.9985
     },
     {
@@ -43,7 +43,7 @@
       "t": 0.2,
       "want": "air",
       "got": "air",
-      "fov": 63.69427469405945,
+      "fov": 63.38288172757388,
       "speed": 20.174487192903413
     },
     {
@@ -51,36 +51,36 @@
       "t": 1.2,
       "want": "swing",
       "got": "swing",
-      "fov": 68.05100330448882,
-      "speed": 25.94710121486794
+      "fov": 68.94053838904503,
+      "speed": 27.308851111197775
     },
     {
       "scenario": "reel",
       "t": 1.5,
       "want": "reel",
       "got": "reel",
-      "fov": 60.00004240367368,
+      "fov": 60.000030057126324,
       "speed": 10.033052336191599
     }
   ],
   "camera": {
     "idleFov": 60,
-    "fastFov": 68.28060983145724,
-    "fastSpeed": 25.970239920243728,
-    "leanRollRad": 0.01682177355524674,
+    "fastFov": 68.99595015777663,
+    "fastSpeed": 26.735487615749886,
+    "leanRollRad": 0,
     "shakeTrauma": 0.14892527449269483
   },
-  "overlay": "fps        60   (16.65 ms avg, 18.7 ms p99)\nscale      1.00 x DPR 2\ngpu        9.27 ms\n  scene     4.45 ms\n  shadow    4.82 ms\ndraws      86   tris 49k\nmode       ground   0.0 m/s   gas 40.0\npos        -12.0, 20.8, -69.4\nadapter    apple metal-3",
+  "overlay": "fps        30   (33.34 ms avg, 34.4 ms p99)\nscale      1.00 x DPR 2\ngpu        11.10 ms\n  scene     5.13 ms\n  shadow    5.97 ms\ndraws      123   tris 84k\nmode       ground   0.0 m/s   gas 40.0\npos        -12.0, 20.8, -69.4\nadapter    apple metal-3",
   "tuningExport": "| Group | Constant | Before | After | Unit |\n|---|---|---|---|---|\n| World | Gravity (chosen within spec range 9.81 to 20) (`gravity`) | 16 | 14.5 | m/s² |",
   "controls": {
     "run": {
       "moved": 7.460583893798267,
       "pose": "run"
     },
-    "left": 2.136471393798273,
-    "right": 2.0614838937982745,
-    "back": 2.133681581066785,
-    "jumpVy": 5.253536032093776,
+    "left": 2.0614838937982727,
+    "right": 2.3335404157838844,
+    "back": 2.0614838937982682,
+    "jumpVy": 4.851043020367211,
     "hookL": "flying",
     "hookLHeld": "attached",
     "hookR": "flying",
@@ -92,12 +92,12 @@
       "gasBefore": 40,
       "gasAfter": 39.7499999999998,
       "restBefore": [
-        34.467295435528264,
-        34.46729544617666
+        34.61719951258857,
+        34.61719952309918
       ],
       "restAfter": [
-        11.21729543552826,
-        11.217295446156038
+        11.367199512588561,
+        11.367199523079227
       ]
     },
     "release": [
@@ -125,6 +125,377 @@
       "boost": true,
       "reset": true,
       "pause": true
+    }
+  },
+  "m2": {
+    "insideTitan:titan-yard": 0,
+    "insideTitan:titan-turn": 0,
+    "insideTitan:titan-grab": 0,
+    "insideTitan:nape-kill": 0,
+    "titan": {
+      "walk": {
+        "id": 1,
+        "brain": "wander",
+        "alive": true,
+        "sees": false,
+        "pose": {
+          "x": -2.4331151657609915,
+          "z": -44.367272895466535,
+          "yaw": 0.5067143244389775,
+          "h": 12,
+          "gait": 3.739645602590816,
+          "stride": 0.6410256410256411,
+          "lookYaw": 0,
+          "lookPitch": 0,
+          "lean": 0,
+          "action": "none",
+          "actionT": 0,
+          "arm": "R",
+          "target": [
+            0,
+            0,
+            0
+          ]
+        },
+        "nape": [
+          -2.162009817775098,
+          8.989570462340504,
+          -43.952465531143204
+        ]
+      },
+      "turn": [
+        {
+          "id": 1,
+          "brain": "notice",
+          "alive": true,
+          "sees": true,
+          "pose": {
+            "x": 0,
+            "z": 0,
+            "yaw": 0.35633805561550885,
+            "h": 12,
+            "gait": 0,
+            "stride": 0,
+            "lookYaw": 0.6084860367350349,
+            "lookPitch": -0.23451968881847088,
+            "lean": 0,
+            "action": "none",
+            "actionT": 0,
+            "arm": "R",
+            "target": [
+              0,
+              0,
+              0
+            ]
+          },
+          "nape": [
+            0.16076786035068186,
+            9.01260571685965,
+            0.4319071566299347
+          ]
+        },
+        {
+          "id": 1,
+          "brain": "chase",
+          "alive": true,
+          "sees": true,
+          "pose": {
+            "x": -4.745481240968205,
+            "z": -3.2510145490478157,
+            "yaw": 1.0008506267431596,
+            "h": 12,
+            "gait": 4.312174448113,
+            "stride": 1,
+            "lookYaw": -0.04011192207145975,
+            "lookPitch": -0.26884162344365226,
+            "lean": 0.14,
+            "action": "none",
+            "actionT": 0,
+            "arm": "R",
+            "target": [
+              0,
+              0,
+              0
+            ]
+          },
+          "nape": [
+            -4.712347275162087,
+            9.017788987770471,
+            -3.3397603295464897
+          ]
+        }
+      ],
+      "windup": {
+        "id": 1,
+        "brain": "windup",
+        "alive": true,
+        "sees": true,
+        "pose": {
+          "x": 80.97743599592266,
+          "z": -30.572601442503814,
+          "yaw": 0.17566219487436185,
+          "h": 12,
+          "gait": 16.01789651819967,
+          "stride": 0,
+          "lookYaw": -0.03722637266189577,
+          "lookPitch": -0.07666297799149321,
+          "lean": 0,
+          "action": "windup",
+          "actionT": 0.6309523809523818,
+          "arm": "R",
+          "target": [
+            79.66479517526089,
+            8.6084673976028,
+            -38.8980052728793
+          ]
+        },
+        "nape": [
+          80.76440817637186,
+          8.790633526600667,
+          -31.77281501765451
+        ]
+      },
+      "hold": {
+        "id": 1,
+        "brain": "hold",
+        "alive": true,
+        "sees": false,
+        "pose": {
+          "x": 80.97743599592266,
+          "z": -30.572601442503814,
+          "yaw": 0.15637959863479975,
+          "h": 12,
+          "gait": 16.01789651819967,
+          "stride": 0,
+          "lookYaw": -0.037589067441967355,
+          "lookPitch": -0.09084776114421289,
+          "lean": 0,
+          "action": "hold",
+          "actionT": 1,
+          "arm": "R",
+          "target": [
+            79.93680958105904,
+            7.491564658740362,
+            -37.41117619927168
+          ]
+        },
+        "nape": [
+          80.79796939579495,
+          8.81811978641671,
+          -31.710865540807912
+        ]
+      },
+      "collapse": {
+        "id": 1,
+        "brain": "collapse",
+        "alive": false,
+        "sees": false,
+        "pose": {
+          "x": 0,
+          "z": 0,
+          "yaw": 0,
+          "h": 12,
+          "gait": 0,
+          "stride": 0,
+          "lookYaw": 0,
+          "lookPitch": 0,
+          "lean": 0,
+          "action": "collapse",
+          "actionT": 0.5433333333333323,
+          "arm": "R",
+          "target": [
+            0,
+            0,
+            0
+          ]
+        },
+        "nape": [
+          -4.9876136600765604e-17,
+          8.290621307186441,
+          -3.7069934809621836
+        ]
+      },
+      "steam": 196
+    },
+    "insideTitan:body-slash": 0,
+    "insideTitan:grab-escape": 0,
+    "insideTitan:supply": 0,
+    "insideTitan:hook-titan": 0,
+    "hud": {
+      "hit": {
+        "blades": 0.92,
+        "kills": 0,
+        "grabShown": false,
+        "escape": 0,
+        "supplying": false,
+        "marker": {
+          "kind": "hit",
+          "at": 4386.200000000186
+        },
+        "crosshair": "in"
+      },
+      "kill": {
+        "blades": 0.92,
+        "kills": 1,
+        "grabShown": false,
+        "escape": 0,
+        "supplying": false,
+        "marker": {
+          "kind": "kill",
+          "at": 4905.5999999996275
+        },
+        "crosshair": "in"
+      },
+      "grab": [
+        {
+          "blades": 1,
+          "kills": 0,
+          "grabShown": true,
+          "escape": 0.32343749999999993,
+          "supplying": false,
+          "marker": {
+            "kind": "",
+            "at": 0
+          },
+          "crosshair": "assist"
+        },
+        {
+          "blades": 1,
+          "kills": 0,
+          "grabShown": true,
+          "escape": 0.7484374999999989,
+          "supplying": false,
+          "marker": {
+            "kind": "",
+            "at": 0
+          },
+          "crosshair": "assist"
+        }
+      ],
+      "supply": [
+        {
+          "blades": 0.2,
+          "kills": 0,
+          "grabShown": false,
+          "escape": 0,
+          "supplying": false,
+          "marker": {
+            "kind": "",
+            "at": 0
+          },
+          "crosshair": "out"
+        },
+        {
+          "blades": 0.6111111111111099,
+          "kills": 0,
+          "grabShown": false,
+          "escape": 0,
+          "supplying": true,
+          "marker": {
+            "kind": "",
+            "at": 0
+          },
+          "crosshair": "out"
+        },
+        {
+          "blades": 1,
+          "kills": 0,
+          "grabShown": false,
+          "escape": 0,
+          "supplying": false,
+          "marker": {
+            "kind": "",
+            "at": 0
+          },
+          "crosshair": "out"
+        }
+      ],
+      "crosshairOnTitan": "in"
+    },
+    "insideTitan:titan-approach": 0,
+    "footsteps": [
+      {
+        "distance": 60.31281573910245,
+        "shake": 0.02734556485687386
+      },
+      {
+        "distance": 56.63812730011584,
+        "shake": 0.03272419941419913
+      },
+      {
+        "distance": 48.583850195019096,
+        "shake": 0.04735930154057078
+      },
+      {
+        "distance": 44.1005147089774,
+        "shake": 0.05782180597855294
+      },
+      {
+        "distance": 36.18893151042246,
+        "shake": 0.08260823628118308
+      },
+      {
+        "distance": 32.981267023451664,
+        "shake": 0.09604565480560792
+      },
+      {
+        "distance": 25.634281590765486,
+        "shake": 0.13949574644001914
+      },
+      {
+        "distance": 21.483776920919436,
+        "shake": 0.17717819598192858
+      },
+      {
+        "distance": 15.769694474034095,
+        "shake": 0.2615082917011462
+      },
+      {
+        "distance": 13.288955023612889,
+        "shake": 0.32069675255411867
+      },
+      {
+        "distance": 13.288955023612889,
+        "shake": 0.32069675255411867
+      },
+      {
+        "distance": 13.288955023612889,
+        "shake": 0.32069675255411867
+      },
+      {
+        "distance": 13.288955023612889,
+        "shake": 0.32069675255411867
+      },
+      {
+        "distance": 13.288955023612889,
+        "shake": 0.32069675255411867
+      }
+    ],
+    "live": {
+      "crosshair": "in",
+      "hook": {
+        "state": "attached",
+        "part": 3
+      },
+      "slash": 1,
+      "grabbed": true,
+      "escaped": true,
+      "mashMs": 448
+    },
+    "audio": {
+      "slash-swish": 3,
+      "blade-clang": 1,
+      "kill-thud": 2,
+      "steam-hiss": 2,
+      "titan-step": 50,
+      "grab-crunch": 3,
+      "release-whoosh": 3,
+      "titan-groan": 5,
+      "windup-rush": 3,
+      "titan-grunt": 1,
+      "collapse-rumble": 2,
+      "supply-clank": 1,
+      "supply-done": 1
     }
   }
 }

@@ -3,6 +3,7 @@
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { featuresM2 } from './features-m2.mjs';
 
 export async function features(browser, h) {
   const { openPage, waitState, pass, fail, EVIDENCE, ROOT } = h;
@@ -95,7 +96,8 @@ export async function features(browser, h) {
   // Camera: FOV widens with speed, lean while swinging from a side anchor, shake on impact.
   const idleFov = poses[0].fov;
   const [fast] = await probeScenario('swing-momentum', [1.6], async (page) => state(page));
-  const [lean] = await probeScenario('side-swing', [1.0], async (page) => state(page));
+  // 1.4 s: with the auto-pull (added when M1 closed) the cable goes taut at 1.1 s, not before 1.0 s.
+  const [lean] = await probeScenario('side-swing', [1.4], async (page) => state(page));
   const [shake] = await probeScenario('wall-stick', [1.35], async (page) => state(page));
   report.camera = { idleFov, fastFov: fast.camera.fov, fastSpeed: fast.t.speed, leanRollRad: lean.camera.roll, shakeTrauma: shake.camera.trauma };
   if (fast.camera.fov > idleFov + 4) pass(`camera: FOV ${idleFov.toFixed(1)} at rest, ${fast.camera.fov.toFixed(1)} at ${fast.t.speed.toFixed(1)} m/s`);
@@ -145,11 +147,11 @@ export async function features(browser, h) {
   // ------------------------------------------------ live controls with real input
   {
     // Live play in the hook-attach fixture world: flat ground, a wall 40 m ahead.
-    const { page, context, logs } = await openPage(browser, '?play=hook-attach');
+    const { page, context, logs } = await openPage(browser, '?play=hook-attach&nolock=1');
     await waitState(page, ['ready']);
     await page.locator('#overlay').click();
     await page.waitForTimeout(400);
-    const locked = await page.evaluate(() => Boolean(document.pointerLockElement));
+    const locked = await page.evaluate(() => Boolean(document.pointerLockElement) || new URLSearchParams(location.search).get('nolock') === '1');
     const results = {};
     if (!locked) {
       fail('controls: pointer lock was not granted after clicking to play');
@@ -244,5 +246,6 @@ export async function features(browser, h) {
     await context.close();
   }
 
+  report.m2 = await featuresM2(browser, h);
   writeFileSync(resolve(dir, 'features.json'), JSON.stringify(report, null, 2));
 }

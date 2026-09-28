@@ -21,6 +21,13 @@ export class Input {
     private readonly tuning: Tuning,
     yaw: number,
     pitch: number,
+    /**
+     * Test seam (?nolock=1): behave as if the pointer were locked without the Pointer Lock API.
+     * Chrome refuses pointer lock when its window is not the active one on the desktop, which is
+     * the case for the automated browser while someone else is using the laptop. Key and mouse
+     * events are still the real ones.
+     */
+    private readonly fakeLock = false,
   ) {
     this.yaw = yaw;
     this.pitch = pitch;
@@ -59,6 +66,11 @@ export class Input {
   }
 
   requestLock(): void {
+    if (this.fakeLock) {
+      this.locked = true;
+      this.onLockChange?.(true);
+      return;
+    }
     void this.canvas.requestPointerLock?.();
   }
 
@@ -83,7 +95,11 @@ export class Input {
     if (!this.locked) return;
     if (down && e.code === 'Escape') {
       // Browsers usually release the pointer on Escape themselves; do it explicitly too.
-      document.exitPointerLock();
+      if (this.fakeLock) {
+        this.locked = false;
+        this.clear();
+        this.onLockChange?.(false);
+      } else document.exitPointerLock();
       return;
     }
     if (down && e.code === 'KeyR' && !e.repeat) this.resetQueued = true;

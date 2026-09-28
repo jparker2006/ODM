@@ -15,8 +15,14 @@ npm run dev
 
 Open http://127.0.0.1:5180 and click to play.
 
-- `?play=<scenario>` plays live in a scenario's test world, for example `?play=hook-attach`, which has flat ground and a wall ahead.
-- `?scenario=<scenario>` watches a scripted run, for example `?scenario=replay-swing-chain`.
+The default game is the district with one Titan on the avenue, in sight of the spawn roof.
+
+- `?play=<scenario>` plays live in a scenario's test world. Examples:
+  - `?play=titan-yard`: open ground, a few low blocks, a supply crate and one wandering Titan.
+  - `?play=titan-street`: a 16 m street between 15 m buildings, with a Titan.
+  - `?play=grab-ledge`: an 8 m roof edge with a Titan walking up to grab you.
+  - `?play=hook-attach`: flat ground and a wall ahead, with no Titan.
+- `?scenario=<scenario>` watches a scripted run, for example `?scenario=nape-kill` or `?scenario=replay-swing-chain`.
 
 ## Controls
 
@@ -26,14 +32,17 @@ Open http://127.0.0.1:5180 and click to play.
 | Left click (hold) | Left hook |
 | Right click (hold) | Right hook |
 | Shift (hold) | Reel in (spends gas) |
-| Space | Gas boost in the air, jump on the ground, push off a wall |
+| Space | Gas boost in the air, jump on the ground, push off a wall. Mash it to break free of a grab |
+| E | Slash. A cut through the nape at 15 m/s or more kills |
 | WASD | Steer in the air, run on the ground |
 | R | Reset to spawn |
 | Esc | Pause |
 | F3 | Performance overlay: frame time, render scale, GPU time per pass |
 | F4 | Tuning panel: every feel constant, live, with a before and after export |
 
-The crosshair has three states:
+The HUD shows gas and blade condition at the bottom and the kill count at the top right. A hit marker flashes at the crosshair when a cut connects; a kill gets a bigger red one. Stand on an orange supply crate (rooftops, with a flag) to refill gas and blades.
+
+The crosshair has three states (a Titan's body counts as something to catch):
 - **Solid teal:** a hook fired now will catch.
 - **Dashed:** aim assist will snap the hook to a nearby edge.
 - **Faded:** out of range, or nothing to catch.

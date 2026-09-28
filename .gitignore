@@ -6,3 +6,4 @@ evidence/**/frames/
 *.blend1
 reference/
 .env*
+evidence/shots/
