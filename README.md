@@ -2,7 +2,7 @@
 
 A private browser game: Levi on ODM gear in an evacuated, walled medieval district, built to find out how close Claude Opus can get to a AAA look and feel. Three.js with WebGPU, TypeScript, and Blender for every asset.
 
-**Status:** Milestone 1, "Gear". ODM traversal in a to-scale greybox district. It's a feel test, with no Titans and no art yet. The contract is in [docs/SPEC.md](docs/SPEC.md), the milestone's done-criteria are in [docs/GOAL.md](docs/GOAL.md), and the latest handoff is [docs/handoff/M1.md](docs/handoff/M1.md).
+**Status:** Milestone 1 ("Gear", ODM traversal in a greybox district) is done and approved. Milestone 2 ("Nape", the first Titan) is next. The contract is [docs/SPEC.md](docs/SPEC.md), the M2 detail is [docs/SPEC-M2.md](docs/SPEC-M2.md), and the current goal is [docs/GOAL.md](docs/GOAL.md). Past goals are in [docs/goals/](docs/goals/) and handoffs in [docs/handoff/](docs/handoff/).
 
 ## Play
 

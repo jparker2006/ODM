@@ -354,15 +354,23 @@ export class Sim {
     // Reel: shorten attached cables and pull toward the anchors, spending gas.
     // A cable already wound to its minimum does nothing (no pull, no gas).
     const reelable = attached.filter((h) => h.rest > t.minRope + 1e-6 || len(sub(this.pos, h.anchor!)) > t.minRope + 0.5);
+    let reeling = false;
     if (intent.reel && reelable.length > 0 && !recovering) {
       const frac = this.spendGasFraction(t.reelGasRate * DT);
       if (frac > 0) {
+        reeling = true;
         for (const h of reelable) {
           h.rest = Math.max(t.minRope, h.rest - t.reelSpeed * DT * frac);
           const toA = normalize(sub(h.anchor!, this.pos));
           acc = addScaled(acc, toA, (t.reelAccel * frac) / reelable.length);
         }
       }
+    }
+
+    // Auto-pull: a light, gas-free pull toward the anchors whenever a hook is attached in the air,
+    // so hooking something ahead draws Levi toward it instead of leaving a slack cable.
+    if (!reeling && reelable.length > 0 && !recovering && !this.groundedAtStart && this.wallTimer === 0 && t.autoPull > 0) {
+      for (const h of reelable) acc = addScaled(acc, normalize(sub(h.anchor!, this.pos)), t.autoPull / reelable.length);
     }
 
     // Assist: steer away from walls the swing is about to hit.

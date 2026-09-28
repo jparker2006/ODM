@@ -93,10 +93,11 @@ function releaseWhenRising(height: number): () => Policy {
 
 export const releaseHold: Scenario = {
   name: 'release-hold',
-  description: 'Swing under the beam and keep holding the hook.',
+  description: 'Swing under the beam and keep holding the hook (auto-pull off, to isolate the release boost).',
   world: [ground(), beam],
   spawn: { pos: [0, 25, 0], vel: [0, 0, -20], yaw: 0 },
   duration: 4,
+  tuning: { autoPull: 0 },
   timeline: [
     { t: 0, aimAt: [0, 40, -31] },
     { t: 0, set: { hookL: true } },

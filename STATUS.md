@@ -30,6 +30,13 @@ Progress log. Append after every working session: what was done, what failed, wh
 - *Impact shake was invisible.* Raised it.
 - *Perf runs are noisy while another session compiles Rust or runs Pieced on this laptop* (load average up to 78). Each result records the load average.
 
-**Next**
-- Jake plays Milestone 1 and gives a feel verdict (see `docs/handoff/M1.md`). All tuning after that goes through the feel gate.
-- Milestone 2 ("Nape") starts only after that.
+**Next** (at the time): Jake's feel review.
+
+### Milestone 1 closed (same day)
+
+- **Jake's verdict: approved.** "Plays like butter," but hard to control.
+- He asked for a light auto-pull on hook attach. Added `autoPull` = 8 m/s² (gas-free, off while actually reeling) and committed at his request.
+- A bug surfaced while testing it: holding reel with no gas used to switch the auto-pull off. The auto-pull is now gated on reeling actually happening.
+- The release-gain test runs with auto-pull off, because hanging on now climbs.
+- M1 goal archived to `docs/goals/M1.md`.
+- Next: Milestone 2 "Nape" (`docs/SPEC-M2.md`, `docs/GOAL.md`).

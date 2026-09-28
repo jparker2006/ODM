@@ -50,6 +50,7 @@ export const PARAMS = {
   reelSpeed: p('Reel', 'Reel-in speed', 'm/s', 18, 2, 50, 0.5),
   reelAccel: p('Reel', 'Reel pull toward anchor', 'm/s²', 28, 0, 80, 1),
   reelGasRate: p('Reel', 'Reel gas use', 'gas/s', 0.5, 0, 3, 0.05),
+  autoPull: p('Reel', 'Auto-pull toward anchor while hooked (no gas, off while reeling)', 'm/s²', 8, 0, 40, 0.5),
 
   // Gas
   gasCapacity: p('Gas', 'Gas capacity', 's of boost', 40, 5, 120, 1),
