@@ -259,7 +259,8 @@ export class Sim {
     this.yaw = intent.yaw;
     this.pitch = clamp(intent.pitch, -1.5, 1.5);
 
-    if (pressed('reset')) {
+    // Safety: anything that falls out of the world goes back to the spawn.
+    if (pressed('reset') || this.pos.y < -100) {
       this.reset();
       this.prev = intent;
       this.tick++;
@@ -351,13 +352,15 @@ export class Sim {
     }
 
     // Reel: shorten attached cables and pull toward the anchors, spending gas.
-    if (intent.reel && attached.length > 0 && !recovering) {
+    // A cable already wound to its minimum does nothing (no pull, no gas).
+    const reelable = attached.filter((h) => h.rest > t.minRope + 1e-6 || len(sub(this.pos, h.anchor!)) > t.minRope + 0.5);
+    if (intent.reel && reelable.length > 0 && !recovering) {
       const frac = this.spendGasFraction(t.reelGasRate * DT);
       if (frac > 0) {
-        for (const h of attached) {
+        for (const h of reelable) {
           h.rest = Math.max(t.minRope, h.rest - t.reelSpeed * DT * frac);
           const toA = normalize(sub(h.anchor!, this.pos));
-          acc = addScaled(acc, toA, (t.reelAccel * frac) / attached.length);
+          acc = addScaled(acc, toA, (t.reelAccel * frac) / reelable.length);
         }
       }
     }

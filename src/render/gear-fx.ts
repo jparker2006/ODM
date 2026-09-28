@@ -110,13 +110,13 @@ export class GearFx {
     const back = lookDir(sim.yaw, 0);
     const tank = new Vector3(pos.x - back.x * 0.25, pos.y - 0.1, pos.z - back.z * 0.25);
     const vel = new Vector3(sim.vel.x, sim.vel.y, sim.vel.z);
-    if (burst) for (let i = 0; i < 6; i++) this.emit(tank, vel.clone().multiplyScalar(0.3).add(new Vector3(Math.sin(i * 2.1) * 3, 1.5, Math.cos(i * 2.1) * 3)), 0.35);
+    if (burst) for (let i = 0; i < 6; i++) this.emit(tank, vel.clone().multiplyScalar(0.3).add(new Vector3(Math.sin(i * 2.1) * 3, 1.5, Math.cos(i * 2.1) * 3)), 0.12);
     const streaming = sim.thrusting || (sim.mode === 'reel' && sim.gas > 0);
     if (streaming) {
       this.emitAcc += dt * 40;
       while (this.emitAcc >= 1) {
         this.emitAcc -= 1;
-        this.emit(tank, vel.clone().multiplyScalar(0.2).add(new Vector3(-back.x * 4, -1, -back.z * 4)), 0.22);
+        this.emit(tank, vel.clone().multiplyScalar(0.2).add(new Vector3(-back.x * 4, -1, -back.z * 4)), 0.08);
       }
     } else {
       this.emitAcc = 0;

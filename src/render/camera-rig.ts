@@ -44,6 +44,13 @@ export class CameraRig {
       y: playerPos.y + t.camHeight - d.y * t.camDistance,
       z: playerPos.z + r.z * t.camShoulder - d.z * t.camDistance,
     };
+    // Looking up from the ground puts the boom under the floor: lift the ideal point above it
+    // (before the collision probe), rather than letting the probe drag the camera into Levi's back.
+    const headY = playerPos.y + t.camHeight * 0.6;
+    if (ideal.y < headY) {
+      const floorHit = sim.world.raycast({ x: ideal.x, y: headY, z: ideal.z }, { x: 0, y: -1, z: 0 }, headY - ideal.y + 1);
+      if (floorHit && ideal.y < floorHit.point.y + 0.35) ideal.y = floorHit.point.y + 0.35;
+    }
     if (!this.initialized) {
       this.pos.set(ideal.x, ideal.y, ideal.z);
       this.initialized = true;
@@ -76,6 +83,7 @@ export class CameraRig {
     }
     this.pulledIn = want - allowed;
     const cam = new Vector3(head.x + dir.x * allowed, head.y + dir.y * allowed, head.z + dir.z * allowed);
+
 
     // FOV widens with speed.
     const s = MathUtils.clamp((speed - t.fovSpeedLow) / Math.max(1e-3, t.fovSpeedHigh - t.fovSpeedLow), 0, 1);

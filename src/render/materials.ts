@@ -46,7 +46,7 @@ export function greyboxMaterial(style: GreyboxStyle): MeshStandardNodeMaterial {
 }
 
 export const PALETTE: Record<string, GreyboxStyle> = {
-  mat_ground: { base: '#6f6a62', fine: 0.1, coarse: 0.28, coarseSpacing: 10 },
+  mat_ground: { base: '#9a9286', fine: 0.1, coarse: 0.28, coarseSpacing: 10 },
   mat_building: { base: '#c9c1b3', fine: 0.06, coarse: 0.2, coarseSpacing: 10, storey: 3.5 },
   mat_roof: { base: '#9b6a55', fine: 0.08, coarse: 0.18, coarseSpacing: 5 },
   mat_tower: { base: '#b9b2a6', fine: 0.06, coarse: 0.22, coarseSpacing: 10, storey: 5 },

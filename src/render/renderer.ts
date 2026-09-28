@@ -74,7 +74,7 @@ export class Renderer {
     this.scene.backgroundNode = mix(horizon, zenith, pow(h, float(0.55)));
     this.scene.fog = new Fog(new Color('#e3c4a4'), 250, 2600);
 
-    this.scene.add(new HemisphereLight(new Color('#bcd2ee'), new Color('#7a6a58'), 1.1));
+    this.scene.add(new HemisphereLight(new Color('#c4d6ee'), new Color('#8a7a66'), 1.7));
     this.sun = new DirectionalLight(new Color('#ffd9ae'), 3.2);
     this.sun.castShadow = true;
     this.sun.shadow.mapSize.set(2048, 2048);

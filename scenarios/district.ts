@@ -88,8 +88,12 @@ function avenueSwinger(opts: { endZ: number; heightBias: number }): () => Policy
         Object.assign(out, aimAtPoint(sim, v3(0, sim.pos.y, sim.pos.z - 30)));
         if (t >= coastUntil) phase = 'fire';
       }
-      // A little gas when slow or dropping fast.
+      // A little gas when slow or dropping fast; when low and free, look up and climb with gas.
       out.boost = phase !== 'fire' && (len(sim.vel) < 14 || sim.vel.y < -7);
+      if ((phase === 'coast' || phase === 'swing') && sim.pos.y < 7) {
+        Object.assign(out, aimAtPoint(sim, v3(0, sim.pos.y + 14, sim.pos.z - 25)));
+        out.boost = true;
+      }
       out.hookL = hold.hookL;
       out.hookR = hold.hookR;
       void hooks;
@@ -193,6 +197,7 @@ export const replayWallReel: Scenario = {
     { t: 0, aimAt: [0, 47, -750] },
     { t: 0.1, set: { hookL: true } },
     { t: 0.6, aim: { yaw: 0, pitch: 0.55 }, set: { reel: true } },
+    { t: 2.9, aim: { yaw: 0, pitch: 0.1 }, set: { reel: false, hookL: false } },
   ],
   browser: { replayEvery: 6 },
 };
