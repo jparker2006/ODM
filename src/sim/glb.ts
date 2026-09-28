@@ -61,3 +61,11 @@ export function markersFromGlb(json: GlbJson): Record<string, [number, number, n
   if (typeof raw !== 'string') return {};
   return JSON.parse(raw) as Record<string, [number, number, number]>;
 }
+
+/** Spawn yaw stored as a string custom property on the MARKERS node. */
+export function spawnYawFromGlb(json: GlbJson): number {
+  const node = json.nodes?.find((n) => n.name === 'MARKERS');
+  const raw = node?.extras?.['odm_spawn_yaw'];
+  const v = typeof raw === 'string' || typeof raw === 'number' ? Number(raw) : 0;
+  return Number.isFinite(v) ? v : 0;
+}
