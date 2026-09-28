@@ -3,7 +3,7 @@
 
 import type { Vec3 } from './vec';
 
-export type BoxKind = 'ground' | 'building' | 'tower' | 'wall' | 'fixture';
+export type BoxKind = 'ground' | 'building' | 'tower' | 'wall' | 'fixture' | 'supply';
 
 export interface WorldBox {
   name: string;

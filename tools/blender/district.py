@@ -23,6 +23,15 @@ Layout
   * Test street: the avenue x in [-10, 10] from z = -40 to z = -400 is lined on both sides by
     continuous 3 to 5 storey houses (13 to 20 m). Cross streets there are at most 10 m wide.
 
+Milestone 2 additions (layout above unchanged):
+  * Eight rooftop supply crates (colliders supply_1 .. supply_8, kind 'supply', anchorable, with
+    matching supply_<n> markers at each crate's top centre). supply_1 sits on the facade roof just
+    north of the spawn roof; the other seven snap to the roofs nearest SUPPLY_TARGETS, a spread
+    found offline by a minimax (k-centre) search over every eligible roof. Each crate also carries
+    a render-only pole and flag (not a collider) so it reads from a distance.
+  * Titan spawn markers at ground level: the centre of each outer square, a point in the central
+    square away from the bell tower, and one on the avenue north of the spawn (titan_spawn_avenue).
+
 Outputs on two empties (exported as node extras):
   * COLLIDERS.odm_colliders: JSON list of {name, kind, min, max, anchorable} in glTF space.
   * MARKERS.odm_markers: JSON {name: [x, y, z]} and MARKERS.odm_spawn_yaw: radians as a string
@@ -54,6 +63,23 @@ CHUNK = 250.0
 COURTYARD_MIN = 28.0
 TEST_Z0 = -400.0
 TEST_Z1 = -40.0
+
+SUPPLY_SIZE = (1.6, 1.0, 1.6)
+SUPPLY_EDGE = 1.5  # minimum gap from the crate to the roof edge
+SUPPLY_NEAR_SPAWN = 40.0
+# Seven interior targets for the remaining crates (x, z). Found offline by a minimax search over
+# every eligible roof with supply_1 fixed near the spawn; each snaps to the nearest eligible roof.
+# Eight points cannot cover a 1.5 km square to 150 m (that needs about 38); this spread gives a
+# worst case of about 394 m on a 10 m grid.
+SUPPLY_TARGETS = [
+    (376.2, -616.8), (-376.3, -617.2), (-594.4, -172.6), (562.8, -172.5),
+    (-506.0, 450.6), (503.6, 446.8), (17.2, 522.2),
+]
+SUPPLY_POLE_H = 7.0
+TITAN_SPAWN_CENTRAL = (-20.0, -20.0)
+TITAN_SPAWN_AVENUE_Z = -200.0
+TITAN_SPAWN_CLEAR = 6.0
+TITAN_SPAWN_TOWER_CLEAR = 10.0
 
 
 def r3(v):
@@ -468,8 +494,88 @@ def build_markers(cols):
     return markers, spawn_house['name']
 
 
-def box_geometry(mn, mx, side_mat, top_mat, verts, faces, mats, sides=True):
-    """Append a box without its bottom face (glTF coords in, Blender coords out)."""
+def build_supply(cols, markers, spawn_house):
+    """Eight rooftop supply crates: colliders (appended to cols) and top-centre markers."""
+    houses = [c for c in cols if c['kind'] == 'building']
+    spawn = markers['spawn']
+    sw, sh, sd = SUPPLY_SIZE
+
+    def fits(c):
+        return (c['max'][0] - c['min'][0] >= sw + 2.0 * SUPPLY_EDGE and
+                c['max'][2] - c['min'][2] >= sd + 2.0 * SUPPLY_EDGE)
+
+    def centre(c):
+        return (c['min'][0] + c['max'][0]) / 2.0, (c['min'][2] + c['max'][2]) / 2.0
+
+    def on_test_street(c):
+        on_avenue = abs(c['max'][0] + AVENUE_W / 2.0) < 1e-6 or abs(c['min'][0] - AVENUE_W / 2.0) < 1e-6
+        return on_avenue and c['max'][2] > TEST_Z0 - 10.0 and c['min'][2] < TEST_Z1 + 10.0
+
+    # supply_1: the tallest roof in the spawn house's own facade row, ahead of the spawn (-z) and
+    # within reach, so it is in view down the avenue from the first frame.
+    row = [c for c in houses if abs(c['max'][0] - spawn_house['max'][0]) < 1e-6 and c is not spawn_house]
+    near = [c for c in row if fits(c) and centre(c)[1] < spawn[2] and
+            math.hypot(centre(c)[0] - spawn[0], centre(c)[1] - spawn[2]) <= SUPPLY_NEAR_SPAWN - 5.0]
+    roofs = [min(near, key=lambda c: (-c['max'][1], math.hypot(centre(c)[0] - spawn[0], centre(c)[1] - spawn[2]),
+                                      c['name']))]
+    # The rest keep off the test street facades (the line-run hooks those) and the spawn roof.
+    eligible = [c for c in houses if fits(c) and not on_test_street(c) and c is not spawn_house]
+    for tx, tz in SUPPLY_TARGETS:
+        best = min(eligible, key=lambda c: (math.hypot(centre(c)[0] - tx, centre(c)[1] - tz), c['name']))
+        if best in roofs:
+            raise SystemExit('two supply targets snap to the same roof ' + best['name'])
+        roofs.append(best)
+
+    supply = []
+    for n, roof in enumerate(roofs, start=1):
+        cx, cz = r3(centre(roof)[0]), r3(centre(roof)[1])
+        y0 = roof['max'][1]
+        name = 'supply_%d' % n
+        supply.append(collider(name, 'supply', (cx - sw / 2.0, y0, cz - sd / 2.0),
+                               (cx + sw / 2.0, y0 + sh, cz + sd / 2.0), True))
+        markers[name] = [cx, r3(y0 + sh), cz]
+    cols.extend(supply)
+    return [r['name'] for r in roofs]
+
+
+def supply_coverage(cols):
+    """Worst distance (xz) from any point of a 10 m grid over the interior to its nearest crate."""
+    pts = [((c['min'][0] + c['max'][0]) / 2.0, (c['min'][2] + c['max'][2]) / 2.0)
+           for c in cols if c['kind'] == 'supply']
+    worst = 0.0
+    g = [-745.0 + 10.0 * k for k in range(150)]
+    for x in g:
+        for z in g:
+            worst = max(worst, min(math.hypot(x - px, z - pz) for px, pz in pts))
+    return worst
+
+
+def footprint_gap(x, z, c):
+    dx = max(c['min'][0] - x, 0.0, x - c['max'][0])
+    dz = max(c['min'][2] - z, 0.0, z - c['max'][2])
+    return math.hypot(dx, dz)
+
+
+def build_titan_spawns(cols, squares, markers):
+    """Ground-level Titan spawn points in open ground: squares and the avenue north of the spawn."""
+    pts = []
+    for n, (_name, (x0, x1, z0, z1)) in enumerate(
+            [q for q in squares if q[0] != 'square_central'], start=1):
+        pts.append(('titan_spawn_%d' % n, r3((x0 + x1) / 2.0), r3((z0 + z1) / 2.0)))
+    pts.append(('titan_spawn_%d' % (len(pts) + 1), TITAN_SPAWN_CENTRAL[0], TITAN_SPAWN_CENTRAL[1]))
+    pts.append(('titan_spawn_avenue', 0.0, TITAN_SPAWN_AVENUE_Z))
+    solid = [c for c in cols if c['kind'] != 'ground']
+    for name, x, z in pts:
+        gap = min(footprint_gap(x, z, c) for c in solid)
+        tower_gap = min(footprint_gap(x, z, c) for c in solid if c['kind'] == 'tower')
+        if gap < TITAN_SPAWN_CLEAR or tower_gap < TITAN_SPAWN_TOWER_CLEAR:
+            raise SystemExit('%s at (%.1f, %.1f) is too close to a building or tower' % (name, x, z))
+        markers[name] = [x, 0.0, z]
+    return [p[0] for p in pts]
+
+
+def box_geometry(mn, mx, side_mat, top_mat, verts, faces, mats, sides=True, bottom=False):
+    """Append a box, by default without its bottom face (glTF coords in, Blender coords out)."""
     x0, y0, z0 = mn
     x1, y1, z1 = mx
     b = len(verts)
@@ -486,6 +592,9 @@ def box_geometry(mn, mx, side_mat, top_mat, verts, faces, mats, sides=True):
         for a, c in ((0, 1), (1, 2), (2, 3), (3, 0)):
             faces.append((b + c, b + a, b + a + 4, b + c + 4))
             mats.append(side_mat)
+    if bottom:
+        faces.append((b + 0, b + 1, b + 2, b + 3))
+        mats.append(side_mat)
 
 
 def chunk_of(c):
@@ -539,6 +648,21 @@ def build_meshes(cols):
             box_geometry(c['min'], c['max'], 0, 1, v, f, m)
         common.mesh_object('district_building_c%02d_%02d' % key, v, f,
                            [mats['mat_building'], mats['mat_roof']], m, parent=root)
+
+    # Supply crates in signal orange, each with a render-only pole and flag that read from afar.
+    supply_mat = common.make_material('mat_supply', (1.0, 0.42, 0.04), roughness=0.6)
+    v, f, m = [], [], []
+    for c in cols:
+        if c['kind'] != 'supply':
+            continue
+        box_geometry(c['min'], c['max'], 0, 0, v, f, m)
+        cx = (c['min'][0] + c['max'][0]) / 2.0
+        cz = (c['min'][2] + c['max'][2]) / 2.0
+        top = c['max'][1]
+        box_geometry((cx - 0.1, top, cz - 0.1), (cx + 0.1, top + SUPPLY_POLE_H, cz + 0.1), 0, 0, v, f, m)
+        box_geometry((cx + 0.1, top + SUPPLY_POLE_H - 1.6, cz - 0.04),
+                     (cx + 1.9, top + SUPPLY_POLE_H - 0.1, cz + 0.04), 0, 0, v, f, m, bottom=True)
+    common.mesh_object('district_supply', v, f, [supply_mat], m, parent=root)
     return len(chunks)
 
 
@@ -548,6 +672,9 @@ def main():
     xl, zl, squares, towers, houses = build_layout(seed)
     cols = build_colliders(towers, houses)
     markers, spawn_house = build_markers(cols)
+    spawn_box = next(c for c in cols if c['name'] == spawn_house)
+    supply_roofs = build_supply(cols, markers, spawn_box)
+    titan_spawns = build_titan_spawns(cols, squares, markers)
 
     nchunks = build_meshes(cols)
 
@@ -567,7 +694,8 @@ def main():
     kinds = {}
     for c in cols:
         kinds[c['kind']] = kinds.get(c['kind'], 0) + 1
-    tris = 2 + sum(10 for c in cols if c['kind'] != 'ground')
+    # Boxes are 10 triangles (no bottom); each crate adds a pole (10) and a closed flag (12).
+    tris = 2 + sum(10 for c in cols if c['kind'] != 'ground') + 22 * kinds.get('supply', 0)
     heights = [c['max'][1] for c in cols if c['kind'] == 'building']
     print('ODM district: seed %d' % seed)
     print('  x streets %d, z streets %d, building chunks %d' % (len(xl), len(zl), nchunks))
@@ -575,7 +703,12 @@ def main():
     print('  building heights %.1f to %.1f m' % (min(heights), max(heights)))
     print('  towers: ' + ', '.join('%s %.1f m at %s' % (t[0], t[2], t[1]) for t in towers))
     print('  squares: ' + ', '.join('%s %s' % (n, q) for n, q in squares))
-    print('  spawn house %s, markers %s' % (spawn_house, json.dumps(markers, sort_keys=True)))
+    base = {k: v for k, v in markers.items() if not k.startswith(('supply_', 'titan_spawn_'))}
+    print('  spawn house %s, markers %s' % (spawn_house, json.dumps(base, sort_keys=True)))
+    print('  supply crates on %s, worst interior distance to a crate %.1f m' % (
+        ', '.join(supply_roofs), supply_coverage(cols)))
+    print('  supply: ' + ', '.join('%s %s' % (k, markers[k]) for k in sorted(markers) if k.startswith('supply_')))
+    print('  titan spawns: ' + ', '.join('%s %s' % (k, markers[k]) for k in titan_spawns))
     print('  triangles (expected) %d' % tris)
     print('  wrote %s (%d bytes)' % (out, os.path.getsize(out)))
 

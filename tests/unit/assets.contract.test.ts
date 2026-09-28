@@ -9,6 +9,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { collidersFromGlb, markersFromGlb, parseGlbJson, type ColliderRecord, type GlbJson } from '../../src/sim/glb';
+import { NAPE, PARTS } from '../../src/sim/titan-body';
 
 const ASSETS = fileURLToPath(new URL('../../public/assets/', import.meta.url));
 const HASHES = JSON.parse(readFileSync(new URL('./asset-hashes.json', import.meta.url), 'utf8')) as Record<string, string>;
@@ -16,6 +17,12 @@ const HASHES = JSON.parse(readFileSync(new URL('./asset-hashes.json', import.met
 const DISTRICT_TRIANGLE_BUDGET = 200_000;
 const DISTRICT_BYTES_BUDGET = 8 * 1024 * 1024;
 const MANNEQUIN_TRIANGLE_BUDGET = 5_000;
+const TITAN_TRIANGLE_BUDGET = 8_000;
+// The spec asks for a supply crate within about 150 m of anywhere inside the Wall. That needs
+// about 38 crates for a 1.5 km square (each covers at most a 212 m square at 150 m), so it is
+// infeasible with the six to eight crates the spec allows. The district places eight crates by a
+// minimax search over eligible roofs; the measured worst case on a 10 m grid is 394.2 m.
+const SUPPLY_COVERAGE_LIMIT = 400;
 
 function load(name: string): { bytes: Uint8Array; json: GlbJson } {
   const bytes = new Uint8Array(readFileSync(ASSETS + name));
@@ -69,9 +76,9 @@ describe('district.glb', () => {
     }
   });
 
-  it('marks buildings, towers and the Wall anchorable and the ground not', () => {
+  it('marks buildings, towers, supply crates and the Wall anchorable and the ground not', () => {
     const kinds = new Set(colliders.map((c) => c.kind));
-    expect([...kinds].sort()).toEqual(['building', 'ground', 'tower', 'wall']);
+    expect([...kinds].sort()).toEqual(['building', 'ground', 'supply', 'tower', 'wall']);
     for (const c of colliders) {
       if (c.kind === 'ground') expect(c.anchorable).toBe(false);
       else expect(c.anchorable, c.name).toBe(true);
@@ -147,6 +154,123 @@ describe('district.glb', () => {
       }
       expect(-40 - cursor).toBeLessThanOrEqual(10.001);
     }
+  });
+
+  const supply = colliders.filter((c) => c.kind === 'supply');
+  const buildings = colliders.filter((c) => c.kind === 'building');
+  const xzDist = (a: number[], b: number[]): number => Math.hypot(a[0] - b[0], a[2] - b[2]);
+  const centre = (c: ColliderRecord): number[] => [(c.min[0] + c.max[0]) / 2, c.max[1], (c.min[2] + c.max[2]) / 2];
+
+  it('has six to eight rooftop supply crates with matching top-centre markers', () => {
+    expect(supply.length).toBeGreaterThanOrEqual(6);
+    expect(supply.length).toBeLessThanOrEqual(8);
+    for (const c of supply) {
+      expect(c.name).toMatch(/^supply_\d+$/);
+      expect(c.anchorable, c.name).toBe(true);
+      const m = markers[c.name];
+      expect(m, c.name).toHaveLength(3);
+      const top = centre(c);
+      for (let i = 0; i < 3; i++) expect(Math.abs(m[i] - top[i]), `${c.name} marker[${i}]`).toBeLessThan(1e-3);
+      const roof = buildings.find(
+        (b) =>
+          Math.abs(b.max[1] - c.min[1]) < 1e-3 &&
+          c.min[0] >= b.min[0] - 1e-6 &&
+          c.max[0] <= b.max[0] + 1e-6 &&
+          c.min[2] >= b.min[2] - 1e-6 &&
+          c.max[2] <= b.max[2] + 1e-6,
+      );
+      expect(roof, `${c.name} stands on a roof`).toBeDefined();
+    }
+    const markerNames = Object.keys(markers).filter((k) => k.startsWith('supply_'));
+    expect(markerNames.sort()).toEqual(supply.map((c) => c.name).sort());
+  });
+
+  it('puts one supply crate near the spawn and spreads the rest over the district', () => {
+    const spawn = markers['spawn'];
+    const near = supply.filter((c) => xzDist(centre(c), spawn) <= 40);
+    expect(near.length).toBeGreaterThanOrEqual(1);
+    let worst = 0;
+    for (let x = -745; x <= 745; x += 10) {
+      for (let z = -745; z <= 745; z += 10) {
+        worst = Math.max(worst, Math.min(...supply.map((c) => xzDist(centre(c), [x, 0, z]))));
+      }
+    }
+    expect(worst).toBeLessThanOrEqual(SUPPLY_COVERAGE_LIMIT);
+  });
+
+  it('has titan spawn markers on open ground inside the Wall, one in sight of the spawn', () => {
+    const spawns = Object.entries(markers).filter(([k]) => k.startsWith('titan_spawn_'));
+    expect(spawns.length).toBeGreaterThanOrEqual(4);
+    const solid = colliders.filter((c) => c.kind !== 'ground');
+    const gap = (p: number[], c: ColliderRecord): number =>
+      Math.hypot(Math.max(c.min[0] - p[0], 0, p[0] - c.max[0]), Math.max(c.min[2] - p[2], 0, p[2] - c.max[2]));
+    for (const [name, p] of spawns) {
+      expect(p[1], name).toBe(0);
+      expect(Math.abs(p[0]), name).toBeLessThan(750);
+      expect(Math.abs(p[2]), name).toBeLessThan(750);
+      for (const c of solid) expect(gap(p, c), `${name} vs ${c.name}`).toBeGreaterThanOrEqual(6);
+    }
+    expect(spawns.some(([, p]) => xzDist(p, markers['spawn']) <= 150)).toBe(true);
+  });
+});
+
+describe('titan.glb', () => {
+  const path = ASSETS + 'titan.glb';
+
+  it('exists', () => {
+    expect(existsSync(path)).toBe(true);
+  });
+
+  const { bytes, json } = load('titan.glb');
+  const nodes = json.nodes ?? [];
+  const byName = new Map(nodes.map((n) => [n.name, n]));
+
+  it('has the recorded hash', () => {
+    expect(sha256(bytes)).toBe(HASHES['titan.glb']);
+  });
+
+  it('is under the triangle budget', () => {
+    expect(triangleCount(json)).toBeGreaterThan(0);
+    expect(triangleCount(json)).toBeLessThan(TITAN_TRIANGLE_BUDGET);
+  });
+
+  it('has one mesh node per skeleton part at its joint, plus the nape, all directly under ti_root', () => {
+    const root = byName.get('ti_root');
+    expect(root).toBeDefined();
+    const children = new Set((root!.children ?? []).map((i) => nodes[i].name));
+    for (const p of PARTS) {
+      const n = byName.get(p.name);
+      expect(n, p.name).toBeDefined();
+      expect(n!.mesh, p.name).toBeDefined();
+      expect(children.has(p.name), p.name).toBe(true);
+      const t = n!.translation ?? [0, 0, 0];
+      for (let i = 0; i < 3; i++) expect(Math.abs(t[i] - p.joint[i]), `${p.name}[${i}]`).toBeLessThan(1e-4);
+    }
+    const nape = byName.get(NAPE.name);
+    expect(nape).toBeDefined();
+    expect(nape!.mesh).toBeUndefined();
+    expect(children.has(NAPE.name)).toBe(true);
+    const t = nape!.translation ?? [0, 0, 0];
+    for (let i = 0; i < 3; i++) expect(Math.abs(t[i] - NAPE.pos[i]), `nape[${i}]`).toBeLessThan(1e-4);
+  });
+
+  it('stands 1 m tall with feet at y = 0, translations only', () => {
+    type Acc = { min?: number[]; max?: number[] };
+    let minY = Infinity;
+    let maxY = -Infinity;
+    for (const n of nodes) {
+      expect((n as { rotation?: number[] }).rotation, n.name).toBeUndefined();
+      expect((n as { scale?: number[] }).scale, n.name).toBeUndefined();
+      if (n.mesh === undefined) continue;
+      const t = n.translation ?? [0, 0, 0];
+      for (const prim of json.meshes![n.mesh].primitives) {
+        const acc = json.accessors![prim.attributes['POSITION']] as Acc;
+        minY = Math.min(minY, t[1] + acc.min![1]);
+        maxY = Math.max(maxY, t[1] + acc.max![1]);
+      }
+    }
+    expect(Math.abs(minY)).toBeLessThan(0.02);
+    expect(Math.abs(maxY - 1)).toBeLessThan(0.02);
   });
 });
 

@@ -6,7 +6,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 BLENDER="${BLENDER:-$(command -v blender || echo /opt/homebrew/bin/blender)}"
 OUT_DIR="${1:-$ROOT/public/assets}"
-ASSETS=(district mannequin)
+ASSETS=(district mannequin titan)
 
 mkdir -p "$OUT_DIR"
 for name in "${ASSETS[@]}"; do
