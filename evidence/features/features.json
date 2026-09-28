@@ -1,0 +1,130 @@
+{
+  "crosshair": {
+    "in": "in",
+    "out": "out",
+    "assist": "assist"
+  },
+  "gas": [
+    {
+      "t": 0.2,
+      "meter": 1,
+      "gas": 3
+    },
+    {
+      "t": 1.5,
+      "meter": 0.46666666666666795,
+      "gas": 1.400000000000004
+    },
+    {
+      "t": 4.1,
+      "meter": 0,
+      "gas": 0
+    }
+  ],
+  "poses": [
+    {
+      "scenario": "smoke",
+      "t": 1,
+      "want": "idle",
+      "got": "idle",
+      "fov": 60,
+      "speed": 0
+    },
+    {
+      "scenario": "landing",
+      "t": 3.2,
+      "want": "run",
+      "got": "run",
+      "fov": 60.000078137279715,
+      "speed": 8.9985
+    },
+    {
+      "scenario": "swing-momentum",
+      "t": 0.2,
+      "want": "air",
+      "got": "air",
+      "fov": 63.69427469405945,
+      "speed": 20.174487192903413
+    },
+    {
+      "scenario": "swing-momentum",
+      "t": 1.2,
+      "want": "swing",
+      "got": "swing",
+      "fov": 68.05100330448882,
+      "speed": 25.94710121486794
+    },
+    {
+      "scenario": "reel",
+      "t": 1.5,
+      "want": "reel",
+      "got": "reel",
+      "fov": 60.00004240367368,
+      "speed": 10.033052336191599
+    }
+  ],
+  "camera": {
+    "idleFov": 60,
+    "fastFov": 68.28060983145724,
+    "fastSpeed": 25.970239920243728,
+    "leanRollRad": 0.01682177355524674,
+    "shakeTrauma": 0.14892527449269483
+  },
+  "overlay": "fps        60   (16.65 ms avg, 18.7 ms p99)\nscale      1.00 x DPR 2\ngpu        9.27 ms\n  scene     4.45 ms\n  shadow    4.82 ms\ndraws      86   tris 49k\nmode       ground   0.0 m/s   gas 40.0\npos        -12.0, 20.8, -69.4\nadapter    apple metal-3",
+  "tuningExport": "| Group | Constant | Before | After | Unit |\n|---|---|---|---|---|\n| World | Gravity (chosen within spec range 9.81 to 20) (`gravity`) | 16 | 14.5 | m/s² |",
+  "controls": {
+    "run": {
+      "moved": 7.460583893798267,
+      "pose": "run"
+    },
+    "left": 2.136471393798273,
+    "right": 2.0614838937982745,
+    "back": 2.133681581066785,
+    "jumpVy": 5.253536032093776,
+    "hookL": "flying",
+    "hookLHeld": "attached",
+    "hookR": "flying",
+    "reel": {
+      "attached": [
+        "attached",
+        "attached"
+      ],
+      "gasBefore": 40,
+      "gasAfter": 39.7499999999998,
+      "restBefore": [
+        34.467295435528264,
+        34.46729544617666
+      ],
+      "restAfter": [
+        11.21729543552826,
+        11.217295446156038
+      ]
+    },
+    "release": [
+      "stowed",
+      "stowed"
+    ],
+    "boost": {
+      "gas": 38.94999999999982,
+      "thrusting": true
+    },
+    "reset": 0,
+    "pause": {
+      "locked": false,
+      "overlay": true,
+      "text": "Paused. Click to resume."
+    },
+    "ok": {
+      "run": true,
+      "strafe": true,
+      "jump": true,
+      "hookL": true,
+      "hookR": true,
+      "reel": true,
+      "release": true,
+      "boost": true,
+      "reset": true,
+      "pause": true
+    }
+  }
+}

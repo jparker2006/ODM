@@ -1,0 +1,44 @@
+{
+  "date": "2026-09-28T18:33:47.564Z",
+  "machine": "MacBook Air M4 16 GB, Google Chrome, vsync on",
+  "loadAverage": [
+    7.45,
+    11.54,
+    26.85
+  ],
+  "viewport": "1470x956 @2x",
+  "adapter": {
+    "vendor": "apple",
+    "architecture": "metal-3",
+    "device": "",
+    "description": "",
+    "isFallback": false,
+    "timestamps": true
+  },
+  "simSeconds": 60,
+  "wallSeconds": 60.088,
+  "frames": 3599,
+  "avgFps": 60,
+  "onePercentLowFps": 53.2,
+  "p99Ms": 18.7,
+  "maxFrameMs": 18.8,
+  "minRenderScale": 1,
+  "cameraInsideGeometryFrames": 0,
+  "spikes": [],
+  "jsMsAvg": 1.58,
+  "jsMsMax": 4.5,
+  "gpuLastSample": {
+    "total": 2.942457,
+    "passes": [
+      {
+        "label": "scene",
+        "ms": 1.854889
+      },
+      {
+        "label": "shadow",
+        "ms": 1.087568
+      }
+    ]
+  },
+  "consoleIssues": []
+}

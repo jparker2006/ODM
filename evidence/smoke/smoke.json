@@ -1,0 +1,20 @@
+{
+  "adapter": {
+    "vendor": "apple",
+    "architecture": "metal-3",
+    "device": "",
+    "description": "",
+    "isFallback": false,
+    "timestamps": true
+  },
+  "state": "ready",
+  "logs": [],
+  "telemetry": {
+    "pos": [
+      -12,
+      20.80001,
+      -69.426
+    ],
+    "mode": "ground"
+  }
+}
