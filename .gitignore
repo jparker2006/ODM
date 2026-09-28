@@ -1,0 +1,8 @@
+node_modules/
+dist/
+captures/
+evidence/
+.DS_Store
+*.blend1
+reference/
+.env*
