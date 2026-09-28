@@ -1,6 +1,6 @@
 # ODM
 
-A private browser game: Levi Ackerman on ODM gear in an evacuated, Trost-style walled district, cutting down Titans. The goal of the project is to find out how close Opus can get to a AAA look and feel. Read `docs/SPEC.md` first, then the current goal file (`docs/GOAL.md`) and `STATUS.md`.
+A private browser game: Levi Ackerman on ODM gear in an evacuated, Trost-style walled district, cutting down Titans. The goal of the project is to find out how close Opus can get to a AAA look and feel. Read `docs/SPEC.md` first, then the current milestone's spec (`docs/SPEC-M<n>.md`, if there is one), the current goal file (`docs/GOAL.md`) and `STATUS.md`. Past goals are in `docs/goals/` and handoffs in `docs/handoff/`.
 
 ## Build rules
 
