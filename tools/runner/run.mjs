@@ -12,6 +12,7 @@ import { mkdirSync, writeFileSync, readFileSync, rmSync, existsSync } from 'node
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PNG } from 'pngjs';
+import { loadavg } from 'node:os';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const EVIDENCE = resolve(ROOT, 'evidence');
@@ -129,19 +130,29 @@ async function noWebGpu(browser) {
 }
 
 async function perf() {
-  const browser = await launch({ uncapped: true });
-  const { page, context, logs } = await openPage(browser, '?scenario=perf');
+  const uncapped = process.env.ODM_PERF_VSYNC !== '1';
+  const browser = await launch({ uncapped });
+  const { page, context, logs } = await openPage(browser, `?scenario=perf${process.env.ODM_PERF_QUERY ?? ''}`);
   await waitState(page, ['ready']);
   const adapter = await page.evaluate(() => window.__odm.adapter);
   checkAdapter(adapter, 'perf');
   await page.evaluate(() => window.__odm.game.toggleOverlay());
+  const tracing = process.env.ODM_TRACE === '1';
+  if (tracing) {
+    await browser.startTracing(page, {
+      path: resolve(EVIDENCE, 'perf', 'trace.json'),
+      categories: ['devtools.timeline', 'disabled-by-default-devtools.timeline', 'v8', 'v8.gc', 'gpu', 'viz', 'blink'],
+    });
+  }
   await page.evaluate(() => window.__odm.start());
   const t0 = Date.now();
   await waitState(page, ['done', 'error'], 600000);
+  if (tracing) await browser.stopTracing();
   const wall = (Date.now() - t0) / 1000;
   await page.screenshot({ path: resolve(EVIDENCE, 'perf', 'perf-end.png') });
   const r = await page.evaluate(() => ({
     frames: window.__odm.frameTimes,
+    js: window.__odm.jsTimes,
     minScale: window.__odm.minRenderScale,
     gpu: window.__odm.game.passTimes(),
     simTime: window.__odm.simTime,
@@ -159,7 +170,9 @@ async function perf() {
   const p99 = [...frames].sort((a, b) => a - b)[Math.floor(frames.length * 0.99)];
   const result = {
     date: new Date().toISOString(),
-    machine: 'MacBook Air M4 16 GB, Google Chrome, vsync and frame-rate limit off',
+    machine: `MacBook Air M4 16 GB, Google Chrome, ${uncapped ? 'vsync and frame-rate limit off' : 'vsync on'}`,
+    // System load (1, 5, 15 min) at the end of the run: other work on the laptop causes stalls.
+    loadAverage: loadavg().map((v) => +v.toFixed(2)),
     viewport: `${VIEWPORT.width}x${VIEWPORT.height} @${DPR}x`,
     adapter,
     simSeconds: r.simTime,
@@ -170,6 +183,12 @@ async function perf() {
     p99Ms: +p99.toFixed(2),
     maxFrameMs: +maxMs.toFixed(2),
     minRenderScale: r.minScale,
+    // Frames over 25 ms, with the simulation time they happened at (1/60 s per frame).
+    spikes: frames
+      .map((ms, i) => ({ frame: i + 1, simT: +((i + 1) / 60).toFixed(2), ms: +ms.toFixed(1), prevJsMs: +(r.js[i] ?? 0).toFixed(1) }))
+      .filter((f) => f.ms > 25),
+    jsMsAvg: +(r.js.reduce((a, b) => a + b, 0) / Math.max(1, r.js.length)).toFixed(2),
+    jsMsMax: +Math.max(...r.js).toFixed(1),
     gpuLastSample: r.gpu,
     consoleIssues: logs,
   };

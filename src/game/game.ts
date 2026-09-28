@@ -18,6 +18,18 @@ import { PerfOverlay } from '../ui/perf-overlay';
 import { Audio } from '../audio/audio';
 import { Automation, type AdapterReport } from './automation';
 
+function settle(r: Renderer, camera: import('three/webgpu').Camera, frames: number): Promise<void> {
+  return new Promise((done) => {
+    let n = 0;
+    const tick = () => {
+      r.render(camera, 16.7, false);
+      if (++n >= frames) done();
+      else requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+}
+
 export interface GameConfig {
   scenario: Scenario | null;
   adapter: GPUAdapter;
@@ -119,6 +131,9 @@ export class Game {
     this.hud.showHud(true);
     if (s) {
       this.hud.hideOverlay();
+      // Settle: render one idle second so load-time garbage collection and any late driver work
+      // happen before control is given.
+      await settle(this.renderer, this.rig.camera, 60);
       auto.state = 'ready';
     } else {
       this.hud.showStart('Click to play.');
@@ -137,7 +152,8 @@ export class Game {
       auto.state = 'ready';
     }
     this.lastFrame = performance.now();
-    requestAnimationFrame((t) => this.frame(t));
+    // three.js drives the loop so its frame counter (used to group GPU timestamps per frame) advances.
+    this.renderer.renderer.setAnimationLoop((t) => this.frame(t));
   }
 
   private startScenario(): void {
@@ -158,7 +174,8 @@ export class Game {
   }
 
   private frame(now: number): void {
-    requestAnimationFrame((t) => this.frame(t));
+    const jsStart = performance.now();
+    const recording = Boolean(this.player && this.running && !this.cfg.automation.paused);
     const auto = this.cfg.automation;
     const realDt = Math.min(0.1, (now - this.lastFrame) / 1000);
     const frameMs = now - this.lastFrame;
@@ -236,5 +253,6 @@ export class Game {
       },
       now,
     );
+    if (recording) auto.jsTimes.push(performance.now() - jsStart);
   }
 }

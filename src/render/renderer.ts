@@ -28,12 +28,10 @@ export interface PassTime {
 class PassInspector extends InspectorBase {
   mainCamera: Camera | null = null;
   labels = new Map<string, string>();
-  override beginRender(uid: string, _scene: unknown, camera: Camera, target: RenderTarget | null): void {
-    const ctx = uid.replace(/:f\d+$/, '');
-    let label = 'scene';
-    if (camera !== this.mainCamera) label = 'shadow';
-    else if (target) label = 'offscreen';
-    this.labels.set(ctx, label);
+  override beginRender(uid: string, _scene: unknown, camera: Camera, _target: RenderTarget | null): void {
+    // The main camera's pass (three renders it into an internal target, then outputs) is the scene;
+    // the sun's shadow camera renders the shadow map.
+    this.labels.set(uid.replace(/:f\d+$/, ''), camera === this.mainCamera ? 'scene' : 'shadow');
   }
 }
 
@@ -48,7 +46,8 @@ export class Renderer {
   passTimes: PassTime[] = [];
   gpuTotal = 0;
   private inspector = new PassInspector();
-  private frameEma = 16.7;
+  private frameEma = 0;
+  private intervalEma = 16.7;
   private sinceScale = 0;
   private frameCount = 0;
   private resolving = false;
@@ -113,9 +112,39 @@ export class Renderer {
     this.sun.target.updateMatrixWorld();
   }
 
+  /**
+   * Compiles every pipeline and uploads every buffer before the player gains control: frustum
+   * culling is switched off and the sun's shadow box is stretched over the whole district for a few
+   * frames, so no object is drawn (in either pass) for the first time mid-flight.
+   */
   async prewarm(camera: Camera): Promise<void> {
+    const culled: { o: { frustumCulled: boolean } }[] = [];
+    this.scene.traverse((o) => {
+      if (o.frustumCulled) {
+        culled.push({ o });
+        o.frustumCulled = false;
+      }
+    });
+    const s = this.sun.shadow.camera;
+    const saved = [s.left, s.right, s.top, s.bottom, s.far];
+    s.left = -1100;
+    s.right = 1100;
+    s.top = 1100;
+    s.bottom = -1100;
+    s.far = 3000;
+    s.updateProjectionMatrix();
+    const target = this.sun.target.position.clone();
+    this.sun.target.position.set(0, 0, 0);
+    this.sun.position.copy(SUN_DIR).multiplyScalar(1500);
+    this.sun.target.updateMatrixWorld();
     await this.renderer.compileAsync(this.scene, camera);
     for (let i = 0; i < 3; i++) this.renderer.render(this.scene, camera);
+    [s.left, s.right, s.top, s.bottom, s.far] = saved as [number, number, number, number, number];
+    s.updateProjectionMatrix();
+    this.sun.target.position.copy(target);
+    this.sun.target.updateMatrixWorld();
+    for (const c of culled) c.o.frustumCulled = true;
+    for (let i = 0; i < 2; i++) this.renderer.render(this.scene, camera);
   }
 
   render(camera: Camera, frameMs: number, adaptive: boolean): void {
@@ -125,14 +154,26 @@ export class Renderer {
     if (this.timestamps && !this.resolving && this.frameCount % 15 === 0) void this.resolveTimes();
   }
 
+  /**
+   * Adaptive render scale. With GPU timestamps it reacts to GPU time (frame intervals under vsync
+   * only ever show the refresh period, which reads as load when it is not). Without timestamps it
+   * reacts only to frames that clearly miss the refresh. Changes are rare because each one resizes
+   * the canvas and reallocates render targets, which itself costs a frame.
+   */
   private adapt(frameMs: number): void {
     const t = this.tuning;
-    this.frameEma += (frameMs - this.frameEma) * 0.05;
+    const load = this.timestamps ? this.gpuTotal : frameMs;
+    const high = this.timestamps ? 13 : 22;
+    const low = this.timestamps ? 8 : 12;
+    this.frameEma += (load - this.frameEma) * 0.03;
+    this.intervalEma += (frameMs - this.intervalEma) * 0.03;
     this.sinceScale++;
-    if (this.sinceScale < 45) return;
+    if (this.sinceScale < 120 || (this.timestamps && this.gpuTotal === 0)) return;
     let next = this.renderScale;
-    if (this.frameEma > 17.8) next = Math.max(t.renderScaleMin, this.renderScale - 0.05);
-    else if (this.frameEma < 13.5) next = Math.min(t.renderScaleMax, this.renderScale + 0.05);
+    // Only shed resolution when frames are actually missing the refresh as well: with vsync off,
+    // Apple GPU timestamps overlap across passes and read high even when frames are fast.
+    if (this.frameEma > high && this.intervalEma > 17.5) next = Math.max(t.renderScaleMin, this.renderScale - 0.05);
+    else if (this.frameEma < low && this.sinceScale > 240) next = Math.min(t.renderScaleMax, this.renderScale + 0.05);
     if (next !== this.renderScale) {
       this.renderScale = +next.toFixed(2);
       this.resize();

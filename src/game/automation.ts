@@ -38,6 +38,8 @@ export class Automation {
   frame = 0;
   simTime = 0;
   frameTimes: number[] = [];
+  /** JavaScript time spent inside each recorded frame (ms). */
+  jsTimes: number[] = [];
   minRenderScale = Infinity;
   errors: string[] = [];
   tuningTable: (all: boolean) => string = () => '';

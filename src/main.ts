@@ -39,7 +39,8 @@ async function main(): Promise<void> {
     device: info?.device ?? '',
     description: info?.description ?? '',
     isFallback: Boolean(info?.isFallbackAdapter ?? (adapter as { isFallbackAdapter?: boolean }).isFallbackAdapter),
-    timestamps: adapter.features.has('timestamp-query'),
+    // ?timestamps=0 turns GPU timing off (to measure its own cost).
+    timestamps: adapter.features.has('timestamp-query') && params.get('timestamps') !== '0',
   };
   auto.adapter = report;
 

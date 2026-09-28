@@ -156,45 +156,45 @@ function key(cx: number, cz: number): number {
   return (cx + 32768) * 65536 + (cz + 32768);
 }
 
-export function rayBox(o: Vec3, d: Vec3, b: WorldBox, maxT: number): RayHit | null {
-  let tmin = 0;
-  let tmax = maxT;
-  let axis = -1;
-  let sign = 0;
-  const lo = [b.min.x, b.min.y, b.min.z];
-  const hi = [b.max.x, b.max.y, b.max.z];
-  const oa = [o.x, o.y, o.z];
-  const da = [d.x, d.y, d.z];
-  for (let a = 0; a < 3; a++) {
-    const oi = oa[a]!;
-    const di = da[a]!;
-    if (Math.abs(di) < 1e-12) {
-      if (oi < lo[a]! || oi > hi[a]!) return null;
-      continue;
-    }
-    let t1 = (lo[a]! - oi) / di;
-    let t2 = (hi[a]! - oi) / di;
-    let s = -1;
-    if (t1 > t2) {
-      const tmp = t1;
-      t1 = t2;
-      t2 = tmp;
-      s = 1;
-    }
-    if (t1 > tmin) {
-      tmin = t1;
-      axis = a;
-      sign = s;
-    }
-    if (t2 < tmax) tmax = t2;
-    if (tmin > tmax) return null;
+/** Slab test for one axis; updates the shared entry/exit state. Returns false on a miss. */
+const slab = { tmin: 0, tmax: 0, axis: -1, sign: 0 };
+function slabAxis(o: number, d: number, lo: number, hi: number, axis: number): boolean {
+  if (Math.abs(d) < 1e-12) return o >= lo && o <= hi;
+  const inv = 1 / d;
+  let t1 = (lo - o) * inv;
+  let t2 = (hi - o) * inv;
+  let s = -1;
+  if (t1 > t2) {
+    const tmp = t1;
+    t1 = t2;
+    t2 = tmp;
+    s = 1;
   }
-  if (axis < 0) return null; // origin inside the box
+  if (t1 > slab.tmin) {
+    slab.tmin = t1;
+    slab.axis = axis;
+    slab.sign = s;
+  }
+  if (t2 < slab.tmax) slab.tmax = t2;
+  return slab.tmin <= slab.tmax;
+}
+
+/** Ray against one box. Allocates only when it hits. */
+export function rayBox(o: Vec3, d: Vec3, b: WorldBox, maxT: number): RayHit | null {
+  slab.tmin = 0;
+  slab.tmax = maxT;
+  slab.axis = -1;
+  slab.sign = 0;
+  if (!slabAxis(o.x, d.x, b.min.x, b.max.x, 0)) return null;
+  if (!slabAxis(o.y, d.y, b.min.y, b.max.y, 1)) return null;
+  if (!slabAxis(o.z, d.z, b.min.z, b.max.z, 2)) return null;
+  if (slab.axis < 0) return null; // origin inside the box
+  const t = slab.tmin;
   const normal = { x: 0, y: 0, z: 0 };
-  if (axis === 0) normal.x = sign;
-  else if (axis === 1) normal.y = sign;
-  else normal.z = sign;
-  return { t: tmin, point: { x: o.x + d.x * tmin, y: o.y + d.y * tmin, z: o.z + d.z * tmin }, normal, box: b };
+  if (slab.axis === 0) normal.x = slab.sign;
+  else if (slab.axis === 1) normal.y = slab.sign;
+  else normal.z = slab.sign;
+  return { t, point: { x: o.x + d.x * t, y: o.y + d.y * t, z: o.z + d.z * t }, normal, box: b };
 }
 
 export function sphereBox(c: Vec3, r: number, b: WorldBox): SphereContact | null {
