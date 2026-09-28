@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 const files = execSync('git ls-files --cached --others --exclude-standard', { encoding: 'utf8' })
   .split('\n')
   .filter((f) => f && /\.(ts|js|mjs|py|md|json|html|css|sh)$/.test(f) && !f.startsWith('node_modules/'));
+const EM_DASH = String.fromCharCode(0x2014);
 const bad = [];
 for (const f of files) {
   let text;
@@ -14,7 +15,7 @@ for (const f of files) {
     continue;
   }
   text.split('\n').forEach((line, i) => {
-    if (line.includes('—')) bad.push(`${f}:${i + 1}`);
+    if (line.includes(EM_DASH)) bad.push(`${f}:${i + 1}`);
   });
 }
 if (bad.length) {

@@ -107,7 +107,7 @@ export class World {
     const nextZ = stepZ > 0 ? (cz + 1) * CELL : cz * CELL;
     let tMaxX = stepX !== 0 ? (nextX - origin.x) / dir.x : Infinity;
     let tMaxZ = stepZ !== 0 ? (nextZ - origin.z) / dir.z : Infinity;
-    let t = 0;
+    let t: number;
     for (let guard = 0; guard < 4096; guard++) {
       const list = this.cells.get(key(cx, cz));
       if (list) for (const i of list) test(i);
