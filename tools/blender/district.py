@@ -443,11 +443,13 @@ def seg_box_clearance_xz(p0, p1, box):
 
 def build_markers(cols):
     houses = [c for c in cols if c['kind'] == 'building']
-    # Spawn: roof of the house on the west side of the test street nearest (-18, -60).
+    # Spawn: the tallest house on the west side of the test street near z = -65, standing at its
+    # north-east roof corner (avenue edge), so no taller neighbour blocks the view down the avenue.
     facing = [c for c in houses if abs(c['max'][0] + 10.0) < 1e-6]
-    spawn_house = min(facing, key=lambda c: (abs((c['min'][2] + c['max'][2]) / 2.0 + 60.0), c['name']))
-    sx = min(max(-18.0, spawn_house['min'][0] + 1.5), spawn_house['max'][0] - 1.5)
-    sz = min(max(-60.0, spawn_house['min'][2] + 1.5), spawn_house['max'][2] - 1.5)
+    near = [c for c in facing if -85.0 <= (c['min'][2] + c['max'][2]) / 2.0 <= -45.0]
+    spawn_house = min(near, key=lambda c: (-c['max'][1], abs((c['min'][2] + c['max'][2]) / 2.0 + 65.0), c['name']))
+    sx = spawn_house['max'][0] - 2.0
+    sz = spawn_house['min'][2] + 1.5
     spawn = [r3(sx), r3(spawn_house['max'][1] + 0.9), r3(sz)]
     markers = {
         'spawn': spawn,
@@ -553,7 +555,8 @@ def main():
     col_node['odm_colliders'] = json.dumps(cols, separators=(',', ':'))
     mk = common.empty_object('MARKERS')
     mk['odm_markers'] = json.dumps(markers, separators=(',', ':'), sort_keys=True)
-    mk['odm_spawn_yaw'] = '0'
+    # Looking down the avenue (-z), turned slightly right toward its centre line.
+    mk['odm_spawn_yaw'] = '-0.2'
     layout = common.empty_object('LAYOUT')
     layout['odm_squares'] = json.dumps(
         [{'name': n, 'min': [q[0], 0.0, q[2]], 'max': [q[1], 0.0, q[3]]} for n, q in squares],

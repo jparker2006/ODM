@@ -1,0 +1,50 @@
+:root {
+  --ink: #f4efe6;
+  --ink-dim: rgba(244, 239, 230, 0.55);
+  --panel: rgba(20, 18, 16, 0.78);
+  --accent: #9fd6c4;
+  --warn: #e8a15f;
+  font-family: ui-sans-serif, -apple-system, 'Helvetica Neue', sans-serif;
+}
+html, body { margin: 0; height: 100%; overflow: hidden; background: #1b1916; color: var(--ink); }
+#app, #app canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+#crosshair { position: fixed; left: 50%; top: 50%; width: 22px; height: 22px; transform: translate(-50%, -50%); pointer-events: none; }
+#crosshair span { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--ink); box-shadow: 0 0 0 1px rgba(0,0,0,0.35); transition: transform 80ms, border-color 80ms, opacity 80ms; }
+#crosshair i { position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: var(--ink); }
+#crosshair.in span { border-color: var(--accent); transform: scale(0.8); }
+#crosshair.in i { background: var(--accent); }
+#crosshair.assist span { border-style: dashed; }
+#crosshair.out span { opacity: 0.45; transform: scale(1.15); }
+#crosshair.out i { opacity: 0.45; }
+
+#gas { position: fixed; left: 50%; bottom: 36px; width: 260px; height: 8px; transform: translateX(-50%); background: rgba(0,0,0,0.45); border-radius: 4px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,0.12); }
+#gas-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #d9e6ef, #ffffff); transform-origin: left; }
+#gas.low #gas-fill { background: var(--warn); }
+#gas label { position: fixed; left: 50%; bottom: 48px; transform: translateX(-50%); font-size: 10px; letter-spacing: 0.3em; color: var(--ink-dim); }
+
+#overlay { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(15, 13, 11, 0.55); backdrop-filter: blur(3px); cursor: pointer; }
+#overlay.loading { cursor: progress; background: #1b1916; }
+#overlay[hidden] { display: none; }
+#overlay .card { max-width: 440px; padding: 28px 32px; background: var(--panel); border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.4); }
+#overlay h1 { margin: 0 0 8px; font-size: 22px; letter-spacing: 0.4em; }
+#overlay p { margin: 0 0 14px; color: var(--ink-dim); line-height: 1.45; }
+#overlay table { border-collapse: collapse; font-size: 13px; width: 100%; }
+#overlay td { padding: 3px 0; }
+#overlay td:first-child { color: var(--ink-dim); padding-right: 16px; white-space: nowrap; }
+#overlay.error .card { border: 1px solid var(--warn); }
+
+#perf { position: fixed; left: 12px; top: 12px; padding: 10px 12px; background: var(--panel); border-radius: 8px; font: 12px/1.5 ui-monospace, Menlo, monospace; white-space: pre; pointer-events: none; }
+
+#tuning { position: fixed; right: 0; top: 0; bottom: 0; width: 380px; overflow-y: auto; background: var(--panel); padding: 12px 14px 40px; font-size: 12px; box-shadow: -6px 0 24px rgba(0,0,0,0.35); }
+#tuning h2 { font-size: 13px; letter-spacing: 0.2em; margin: 4px 0 8px; }
+#tuning h3 { font-size: 11px; letter-spacing: 0.15em; color: var(--accent); margin: 14px 0 4px; text-transform: uppercase; }
+#tuning .row { display: grid; grid-template-columns: 1fr 64px; gap: 2px 8px; align-items: center; padding: 3px 0; }
+#tuning .row label { color: var(--ink); }
+#tuning .row small { grid-column: 1 / -1; color: var(--ink-dim); }
+#tuning .row input[type=range] { grid-column: 1 / -1; width: 100%; }
+#tuning .row input[type=number] { width: 60px; background: rgba(0,0,0,0.35); color: var(--ink); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; padding: 1px 3px; font: inherit; }
+#tuning .row.changed label { color: var(--warn); }
+#tuning .buttons { display: flex; gap: 8px; margin: 8px 0; }
+#tuning button { background: rgba(255,255,255,0.1); color: var(--ink); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; padding: 5px 10px; font: inherit; cursor: pointer; }
+#tuning textarea { width: 100%; height: 160px; background: rgba(0,0,0,0.4); color: var(--ink); font: 11px ui-monospace, Menlo, monospace; border-radius: 5px; }

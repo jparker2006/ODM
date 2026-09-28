@@ -1,7 +1,7 @@
 node_modules/
 dist/
 captures/
-evidence/
+evidence/**/frames/
 .DS_Store
 *.blend1
 reference/
