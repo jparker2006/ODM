@@ -7,6 +7,8 @@ export class Input {
   yaw: number;
   pitch: number;
   private keys = new Set<string>();
+  /** Keys and buttons pressed since the last tick read them, so a tap inside one frame is never lost. */
+  private tapped = new Set<string>();
   private mouse = { L: false, R: false };
   private resetQueued = false;
   locked = false;
@@ -27,8 +29,14 @@ export class Input {
     window.addEventListener('blur', () => this.clear());
     canvas.addEventListener('mousedown', (e) => {
       if (!this.locked) return;
-      if (e.button === 0) this.mouse.L = true;
-      if (e.button === 2) this.mouse.R = true;
+      if (e.button === 0) {
+        this.mouse.L = true;
+        this.tapped.add('MouseL');
+      }
+      if (e.button === 2) {
+        this.mouse.R = true;
+        this.tapped.add('MouseR');
+      }
       e.preventDefault();
     });
     window.addEventListener('mouseup', (e) => {
@@ -56,6 +64,7 @@ export class Input {
 
   private clear(): void {
     this.keys.clear();
+    this.tapped.clear();
     this.mouse.L = false;
     this.mouse.R = false;
   }
@@ -72,17 +81,24 @@ export class Input {
       return;
     }
     if (!this.locked) return;
+    if (down && e.code === 'Escape') {
+      // Browsers usually release the pointer on Escape themselves; do it explicitly too.
+      document.exitPointerLock();
+      return;
+    }
     if (down && e.code === 'KeyR' && !e.repeat) this.resetQueued = true;
-    if (down) this.keys.add(e.code);
-    else this.keys.delete(e.code);
+    if (down) {
+      this.keys.add(e.code);
+      if (!e.repeat) this.tapped.add(e.code);
+    } else this.keys.delete(e.code);
     if (['Space', 'ShiftLeft', 'ShiftRight', 'Tab'].includes(e.code)) e.preventDefault();
   }
 
   intent(): Intent {
-    const k = (c: string) => this.keys.has(c);
+    const k = (c: string) => this.keys.has(c) || this.tapped.has(c);
     const it = idleIntent(this.yaw, this.pitch);
-    it.hookL = this.mouse.L;
-    it.hookR = this.mouse.R;
+    it.hookL = this.mouse.L || this.tapped.has('MouseL');
+    it.hookR = this.mouse.R || this.tapped.has('MouseR');
     it.reel = k('ShiftLeft') || k('ShiftRight');
     it.boost = k('Space');
     it.fwd = k('KeyW');
@@ -92,6 +108,7 @@ export class Input {
     it.slash = k('KeyE');
     it.reset = this.resetQueued;
     this.resetQueued = false;
+    this.tapped.clear();
     return it;
   }
 }

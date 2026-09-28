@@ -32,6 +32,8 @@ function settle(r: Renderer, camera: import('three/webgpu').Camera, frames: numb
 
 export interface GameConfig {
   scenario: Scenario | null;
+  /** Play live with keyboard and mouse in the scenario's world instead of running its timeline. */
+  live?: boolean;
   adapter: GPUAdapter;
   report: AdapterReport;
   automation: Automation;
@@ -77,7 +79,7 @@ export class Game {
     const spawn = resolveSpawn(scenario, district);
     this.sim = new Sim(world, this.tuning, spawn);
     this.prevPos = { ...this.sim.pos };
-    if (s) this.player = new TimelinePlayer(s, spawn);
+    if (s && !this.cfg.live) this.player = new TimelinePlayer(s, spawn);
 
     const app = document.getElementById('app')!;
     this.renderer = new Renderer(app, this.tuning, this.cfg.report.timestamps);
@@ -126,10 +128,12 @@ export class Game {
       setTuning: (k, v) => {
         this.tuning[k] = v;
       },
+      getTuning: (k) => this.tuning[k],
+      camera: () => ({ fov: this.rig.fov, roll: this.rig.roll, trauma: this.rig.trauma, pulledIn: this.rig.pulledIn }),
     });
 
     this.hud.showHud(true);
-    if (s) {
+    if (this.player) {
       this.hud.hideOverlay();
       // Settle: render one idle second so load-time garbage collection and any late driver work
       // happen before control is given.
@@ -192,7 +196,8 @@ export class Game {
         auto.simTime = this.sim.time;
         auto.frame++;
         const sc = this.cfg.scenario!;
-        if (sc.browser?.shots?.some((t) => Math.abs(t - this.sim.time) < 0.5 / 60)) auto.pause(`shot-${this.sim.time.toFixed(2)}`);
+        if (auto.pauseTimes.some((t) => Math.abs(t - this.sim.time) < 0.5 / 60)) auto.pause(`probe-${this.sim.time.toFixed(2)}`);
+        else if (sc.browser?.shots?.some((t) => Math.abs(t - this.sim.time) < 0.5 / 60)) auto.pause(`shot-${this.sim.time.toFixed(2)}`);
         else if (sc.browser?.replayEvery && auto.replay && auto.frame % sc.browser.replayEvery === 0) auto.pause(`replay-${auto.frame}`);
         if (this.sim.time >= sc.duration - 1e-9) {
           auto.state = 'done';
@@ -232,6 +237,10 @@ export class Game {
     this.hud.setCrosshair(aim.valid ? (aim.assisted ? 'assist' : 'in') : 'out');
     this.hud.setGas(this.tuning.infiniteGas >= 0.5 ? 1 : this.sim.gas / this.tuning.gasCapacity);
 
+    const cp = this.rig.camera.position;
+    const inside: import('../sim/world').SphereContact[] = [];
+    this.sim.world.sphereContacts({ x: cp.x, y: cp.y, z: cp.z }, 0.05, inside);
+    if (inside.length > 0 && auto.state === 'running') auto.cameraInsideFrames++;
     this.renderer.render(this.rig.camera, frameMs, true);
     auto.noteRenderScale(this.renderer.renderScale);
 

@@ -12,10 +12,12 @@
     "test": "vitest run",
     "check": "npm run typecheck && npm run lint && npm test",
     "assets": "bash tools/blender/build-all.sh",
-    "browser": "node tools/runner/run.mjs",
+    "browser": "node tools/runner/run.mjs smoke no-webgpu perf replays features",
     "smoke": "node tools/runner/run.mjs smoke no-webgpu",
     "perf": "node tools/runner/run.mjs perf",
-    "replays": "node tools/runner/run.mjs replays"
+    "replays": "node tools/runner/run.mjs replays",
+    "features": "node tools/runner/run.mjs features",
+    "assets:check": "bash tools/blender/check-determinism.sh"
   },
   "dependencies": {
     "three": "0.186.1"

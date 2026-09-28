@@ -155,6 +155,7 @@ async function perf() {
     js: window.__odm.jsTimes,
     minScale: window.__odm.minRenderScale,
     gpu: window.__odm.game.passTimes(),
+    cameraInside: window.__odm.cameraInsideFrames,
     simTime: window.__odm.simTime,
   }));
   await context.close();
@@ -183,6 +184,7 @@ async function perf() {
     p99Ms: +p99.toFixed(2),
     maxFrameMs: +maxMs.toFixed(2),
     minRenderScale: r.minScale,
+    cameraInsideGeometryFrames: r.cameraInside,
     // Frames over 25 ms, with the simulation time they happened at (1/60 s per frame).
     spikes: frames
       .map((ms, i) => ({ frame: i + 1, simT: +((i + 1) / 60).toFixed(2), ms: +ms.toFixed(1), prevJsMs: +(r.js[i] ?? 0).toFixed(1) }))
@@ -199,6 +201,8 @@ async function perf() {
   if (low1 < 45) fail(`perf: 1% low ${low1.toFixed(1)} fps < 45 (${line})`);
   if (maxMs > 100) fail(`perf: a frame took ${maxMs.toFixed(1)} ms > 100 (${line})`);
   if (r.minScale < 0.75) fail(`perf: render scale dropped to ${r.minScale} < 0.75`);
+  if (r.cameraInside > 0) fail(`perf: camera was inside geometry for ${r.cameraInside} frames`);
+  else pass('perf: camera never inside geometry');
   if (logs.length) fail(`perf: console issues: ${logs.join(' | ')}`);
   if (avgFps >= 60 && low1 >= 45 && maxMs <= 100 && r.minScale >= 0.75 && !logs.length) pass(`perf: ${line}`);
 }
@@ -275,7 +279,7 @@ async function shot(browser, name) {
 // ---------------------------------------------------------------- main
 
 const cmds = process.argv.slice(2);
-if (!cmds.length) cmds.push('smoke', 'no-webgpu', 'perf', 'replays');
+if (!cmds.length) cmds.push('smoke', 'no-webgpu', 'perf', 'replays', 'features');
 mkdirSync(EVIDENCE, { recursive: true });
 const server = await serve();
 let browser = null;

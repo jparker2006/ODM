@@ -26,6 +26,8 @@ interface Bindings {
   toggleOverlay: () => void;
   togglePanel: () => void;
   setTuning: (k: TuningKey, v: number) => void;
+  getTuning: (k: TuningKey) => number;
+  camera: () => { fov: number; roll: number; trauma: number; pulledIn: number };
 }
 
 export class Automation {
@@ -41,6 +43,10 @@ export class Automation {
   /** JavaScript time spent inside each recorded frame (ms). */
   jsTimes: number[] = [];
   minRenderScale = Infinity;
+  /** Frames in which the camera was inside world geometry (must stay 0). */
+  cameraInsideFrames = 0;
+  /** Simulation times (s) at which to pause, for probes by the runner. */
+  pauseTimes: number[] = [];
   errors: string[] = [];
   tuningTable: (all: boolean) => string = () => '';
   private b: Bindings | null = null;

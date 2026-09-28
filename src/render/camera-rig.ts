@@ -10,10 +10,10 @@ export class CameraRig {
   readonly camera: PerspectiveCamera;
   private pos = new Vector3();
   private initialized = false;
-  private roll = 0;
-  private trauma = 0;
+  roll = 0;
+  trauma = 0;
   private time = 0;
-  private fov = 60;
+  fov = 60;
   /** Distance the collision probe pulled the camera in (for tests and the overlay). */
   pulledIn = 0;
 
@@ -28,7 +28,7 @@ export class CameraRig {
 
   onEvents(events: SimEvent[], shakeStrength: number): void {
     for (const e of events) {
-      if (e.type === 'impact') this.trauma = Math.min(1, this.trauma + (e.speed / 30) * shakeStrength);
+      if (e.type === 'impact') this.trauma = Math.min(1, this.trauma + (e.speed / 20) * shakeStrength);
       if (e.type === 'taut') this.trauma = Math.min(1, this.trauma + 0.12 * shakeStrength);
     }
   }
@@ -102,13 +102,13 @@ export class CameraRig {
 
     // Shake.
     this.trauma = Math.max(0, this.trauma - dt * 1.6);
-    const sh = this.trauma * this.trauma;
+    const sh = this.trauma * Math.sqrt(this.trauma);
     const nx = Math.sin(this.time * 47.3) * Math.sin(this.time * 13.1);
     const ny = Math.sin(this.time * 39.7 + 1.3) * Math.sin(this.time * 17.9);
     const nz = Math.sin(this.time * 29.1 + 2.1);
 
     this.camera.position.copy(cam);
-    this.camera.rotation.copy(new Euler(pitch + ny * sh * 0.05, yaw + nx * sh * 0.05, this.roll + nz * sh * 0.04, 'YXZ'));
+    this.camera.rotation.copy(new Euler(pitch + ny * sh * 0.08, yaw + nx * sh * 0.08, this.roll + nz * sh * 0.05, 'YXZ'));
     if (Math.abs(this.camera.fov - this.fov) > 1e-3) {
       this.camera.fov = this.fov;
       this.camera.updateProjectionMatrix();

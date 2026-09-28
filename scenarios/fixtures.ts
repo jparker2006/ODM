@@ -219,6 +219,21 @@ export const groundClearanceOff: Scenario = {
   tuning: { assistClearance: 0 },
 };
 
+const sideTower: FixtureBox = { name: 'side-tower', min: [-24, 0, -40], max: [-16, 60, -32] };
+
+export const sideSwing: Scenario = {
+  name: 'side-swing',
+  description: 'Flying past a tower on the left at 22 m/s, hook it and swing around it.',
+  world: [ground(), sideTower],
+  spawn: { pos: [0, 30, 0], vel: [0, 0, -22], yaw: 0 },
+  duration: 3,
+  timeline: [
+    { t: 0, aimAt: [-16, 45, -36] },
+    { t: 0, set: { hookL: true } },
+    { t: 0.4, aim: { yaw: 0.3, pitch: 0 } },
+  ],
+};
+
 const stickWall: FixtureBox = { name: 'stick-wall', min: [-30, 0, -21], max: [30, 40, -20] };
 
 export const wallStick: Scenario = {
@@ -269,6 +284,7 @@ export const fixtureScenarios: Scenario[] = [
   ...noTunnel,
   groundClearance,
   groundClearanceOff,
+  sideSwing,
   wallStick,
   landing,
   landingRoll,

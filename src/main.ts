@@ -12,7 +12,9 @@ window.__odm = auto;
 async function main(): Promise<void> {
   const hud = new Hud();
   const params = new URLSearchParams(location.search);
-  const name = params.get('scenario');
+  // ?scenario=<name> runs a scenario; ?play=<name> plays live (keyboard and mouse) in its world.
+  const name = params.get('scenario') ?? params.get('play');
+  const live = !params.get('scenario') && Boolean(params.get('play'));
   const scenario = name ? findScenario(name) : null;
   auto.scenario = name;
   if (name && !scenario) {
@@ -45,7 +47,7 @@ async function main(): Promise<void> {
   auto.adapter = report;
 
   try {
-    await new Game({ scenario, adapter, report, automation: auto }).boot();
+    await new Game({ scenario, live, adapter, report, automation: auto }).boot();
   } catch (e) {
     auto.state = 'error';
     auto.errors.push(String(e instanceof Error ? (e.stack ?? e.message) : e));
