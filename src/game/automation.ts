@@ -27,7 +27,19 @@ interface Bindings {
   togglePanel: () => void;
   setTuning: (k: TuningKey, v: number) => void;
   getTuning: (k: TuningKey) => number;
-  camera: () => { fov: number; roll: number; trauma: number; pulledIn: number };
+  camera: () => { fov: number; roll: number; trauma: number; pulledIn: number; kick: number; lastStep: { distance: number; shake: number } };
+  hud: () => {
+    blades: number;
+    kills: number;
+    grabShown: boolean;
+    escape: number;
+    supplying: boolean;
+    marker: { kind: string; at: number };
+    crosshair: string;
+  };
+  audioLog: () => { sound: string; event: string; played: boolean }[];
+  titan: () => { brain: string; x: number; z: number; yaw: number; h: number; visible: boolean } | null;
+  steam: () => number;
 }
 
 export class Automation {
@@ -45,6 +57,11 @@ export class Automation {
   minRenderScale = Infinity;
   /** Frames in which the camera was inside world geometry (must stay 0). */
   cameraInsideFrames = 0;
+  /** Of those, frames inside a Titan's body. */
+  cameraInsideTitanFrames = 0;
+  /** Frames rendered while running, and of those, frames with the Titan on screen. */
+  viewFrames = 0;
+  titanInViewFrames = 0;
   /** Simulation times (s) at which to pause, for probes by the runner. */
   pauseTimes: number[] = [];
   errors: string[] = [];

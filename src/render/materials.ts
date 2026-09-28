@@ -52,4 +52,6 @@ export const PALETTE: Record<string, GreyboxStyle> = {
   mat_tower: { base: '#b9b2a6', fine: 0.06, coarse: 0.22, coarseSpacing: 10, storey: 5 },
   mat_wall: { base: '#c7ae88', fine: 0.05, coarse: 0.25, coarseSpacing: 10, storey: 10 },
   mat_fixture: { base: '#b8b8b8', fine: 0.08, coarse: 0.2, coarseSpacing: 10, storey: 4 },
+  // Supply crates: a signal orange that reads from across the district.
+  mat_supply: { base: '#ff7a1a', fine: 0.04, coarse: 0.1, coarseSpacing: 10, roughness: 0.6 },
 };

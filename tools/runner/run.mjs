@@ -21,7 +21,7 @@ const PORT = 4190;
 const VIEWPORT = { width: 1470, height: 956 };
 const DPR = 2;
 
-const REPLAYS = ['replay-swing-chain', 'replay-double-thread', 'replay-wall-reel'];
+const REPLAYS = ['replay-swing-chain', 'replay-double-thread', 'replay-wall-reel', 'nape-kill', 'grab-escape', 'hook-titan'];
 
 let failures = 0;
 const fail = (msg) => {
@@ -111,9 +111,12 @@ async function smoke(browser) {
   else pass(`smoke: screenshot ${shots[0].replace(ROOT + '/', '')}`);
   const telemetry = await page.evaluate(() => window.__odm.telemetry());
   if (!telemetry || telemetry.mode !== 'ground') fail(`smoke: expected Levi standing on the spawn roof, got ${telemetry?.mode}`);
+  const titan = await page.evaluate(() => window.__odm.game.titan());
+  if (!titan || !titan.visible) fail(`smoke: expected a Titan in the district, got ${JSON.stringify(titan)}`);
+  else pass(`smoke: Titan ${titan.h} m tall at (${titan.x.toFixed(0)}, ${titan.z.toFixed(0)}), ${titan.brain}`);
   if (logs.length) fail(`smoke: console errors or warnings:\n  ${logs.join('\n  ')}`);
   else pass('smoke: zero console errors and warnings');
-  writeFileSync(resolve(dir, 'smoke.json'), JSON.stringify({ adapter, state, logs, telemetry: { pos: telemetry?.pos, mode: telemetry?.mode } }, null, 2));
+  writeFileSync(resolve(dir, 'smoke.json'), JSON.stringify({ adapter, state, logs, titan, telemetry: { pos: telemetry?.pos, mode: telemetry?.mode } }, null, 2));
   await context.close();
 }
 
@@ -156,6 +159,8 @@ async function perf() {
     minScale: window.__odm.minRenderScale,
     gpu: window.__odm.game.passTimes(),
     cameraInside: window.__odm.cameraInsideFrames,
+    cameraInsideTitan: window.__odm.cameraInsideTitanFrames,
+    titanInView: window.__odm.titanInViewFrames / Math.max(1, window.__odm.viewFrames),
     simTime: window.__odm.simTime,
   }));
   await context.close();
@@ -185,6 +190,8 @@ async function perf() {
     maxFrameMs: +maxMs.toFixed(2),
     minRenderScale: r.minScale,
     cameraInsideGeometryFrames: r.cameraInside,
+    cameraInsideTitanFrames: r.cameraInsideTitan,
+    titanOnScreenFraction: +r.titanInView.toFixed(3),
     // Frames over 25 ms, with the simulation time they happened at (1/60 s per frame).
     spikes: frames
       .map((ms, i) => ({ frame: i + 1, simT: +((i + 1) / 60).toFixed(2), ms: +ms.toFixed(1), prevJsMs: +(r.js[i] ?? 0).toFixed(1) }))
@@ -201,6 +208,8 @@ async function perf() {
   if (low1 < 45) fail(`perf: 1% low ${low1.toFixed(1)} fps < 45 (${line})`);
   if (maxMs > 100) fail(`perf: a frame took ${maxMs.toFixed(1)} ms > 100 (${line})`);
   if (r.minScale < 0.75) fail(`perf: render scale dropped to ${r.minScale} < 0.75`);
+  if (r.titanInView < 0.5) fail(`perf: the Titan was on screen for only ${(r.titanInView * 100).toFixed(0)}% of frames`);
+  else pass(`perf: Titan on screen for ${(r.titanInView * 100).toFixed(0)}% of frames`);
   if (r.cameraInside > 0) fail(`perf: camera was inside geometry for ${r.cameraInside} frames`);
   else pass('perf: camera never inside geometry');
   if (logs.length) fail(`perf: console issues: ${logs.join(' | ')}`);

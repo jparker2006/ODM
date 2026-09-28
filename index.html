@@ -11,7 +11,12 @@
     <div id="app"></div>
     <div id="hud" hidden>
       <div id="crosshair" class="out"><span></span><i></i></div>
-      <div id="gas"><div id="gas-fill"></div><label>GAS</label></div>
+      <div id="hitmark"><b></b><b></b><b></b><b></b></div>
+      <div id="gas" class="meter"><div class="track"><div id="gas-fill" class="fill"></div></div><label>GAS</label></div>
+      <div id="blades" class="meter"><div class="track"><div id="blades-fill" class="fill"></div></div><label>BLADES</label></div>
+      <div id="kills"><span id="kills-n">0</span><label>KILLS</label></div>
+      <div id="grab" hidden><b>GRABBED</b><div id="escape"><div id="escape-fill"></div></div><small>Mash Space to break free</small></div>
+      <div id="supply" hidden>RESUPPLYING</div>
     </div>
     <div id="overlay" class="loading">
       <div class="card">
@@ -23,6 +28,7 @@
             <tr><td>Left / right click (hold)</td><td>Left / right hook</td></tr>
             <tr><td>Shift (hold)</td><td>Reel in</td></tr>
             <tr><td>Space</td><td>Gas boost (jump on the ground)</td></tr>
+            <tr><td>E</td><td>Slash (cut the nape at speed)</td></tr>
             <tr><td>WASD</td><td>Steer in the air, run on the ground</td></tr>
             <tr><td>R</td><td>Reset to spawn</td></tr>
             <tr><td>Esc</td><td>Pause</td></tr>

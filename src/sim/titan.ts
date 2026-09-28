@@ -96,6 +96,8 @@ export class Titan {
   pose: TitanPose;
   prevPose: TitanPose;
   private strikeNow = false;
+  /** The last step was refused because it would have left the walkable grid. */
+  private blocked = false;
 
   constructor(id: number, spec: TitanSpec, defaultHeight: number) {
     this.id = id;
@@ -484,6 +486,12 @@ export class Titan {
     }
     const wp = this.path[this.pathIdx]!;
     this.moveTo(ctx, wp.x, wp.z, speed, true);
+    // Turning drifted off the straight leg into a blocked cell: drop the path and plan again from here.
+    if (this.blocked) {
+      this.path = [];
+      this.pathIdx = 0;
+      this.repathT = 0;
+    }
     return false;
   }
 
@@ -496,11 +504,13 @@ export class Titan {
     const fwd = lookDir(this.yaw, 0);
     const nx = this.x + fwd.x * s * DT;
     const nz = this.z + fwd.z * s * DT;
+    this.blocked = false;
     if (!checkNav || ctx.nav.free(nx, nz)) {
       this.x = nx;
       this.z = nz;
       this.speed = s;
     } else {
+      this.blocked = true;
       this.speed = 0;
       this.repathT = 0;
     }

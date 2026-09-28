@@ -4,6 +4,7 @@
 
 import { PerspectiveCamera, Vector3, Euler, MathUtils } from 'three/webgpu';
 import type { Sim, SimEvent } from '../sim/sim';
+import type { Tuning } from '../sim/tuning';
 import { lookDir, rightOf, sub, len, normalize, dot, type Vec3 } from '../sim/vec';
 
 export class CameraRig {
@@ -16,6 +17,10 @@ export class CameraRig {
   fov = 60;
   /** Distance the collision probe pulled the camera in (for tests and the overlay). */
   pulledIn = 0;
+  /** Extra FOV from the nape-kill kick, decaying to zero. */
+  kick = 0;
+  /** The most recent Titan footstep: its distance and the shake it added (for the features check). */
+  lastStep = { distance: 0, shake: 0 };
 
   constructor(aspect: number) {
     this.camera = new PerspectiveCamera(60, aspect, 0.1, 6000);
@@ -26,10 +31,22 @@ export class CameraRig {
     this.initialized = false;
   }
 
-  onEvents(events: SimEvent[], shakeStrength: number): void {
+  onEvents(events: SimEvent[], t: Tuning, playerPos: Vec3): void {
     for (const e of events) {
-      if (e.type === 'impact') this.trauma = Math.min(1, this.trauma + (e.speed / 20) * shakeStrength);
-      if (e.type === 'taut') this.trauma = Math.min(1, this.trauma + 0.12 * shakeStrength);
+      if (e.type === 'impact') this.trauma = Math.min(1, this.trauma + (e.speed / 20) * t.shakeImpact);
+      if (e.type === 'taut') this.trauma = Math.min(1, this.trauma + 0.12 * t.shakeImpact);
+      if (e.type === 'titanStep') {
+        // Felt through the camera, strongest close by: the tuned strength at 20 m, falling off with distance.
+        const d = Math.max(1, len(sub(e.pos, playerPos)));
+        const shake = d > t.stepShakeRange ? 0 : t.stepShake * e.strength * Math.min(1.6, 20 / d) * (1 - d / t.stepShakeRange);
+        this.lastStep = { distance: d, shake };
+        this.trauma = Math.min(1, this.trauma + shake);
+      }
+      if (e.type === 'grabbed') this.trauma = Math.min(1, this.trauma + t.grabShake);
+      if (e.type === 'napeKill') {
+        this.trauma = Math.min(1, this.trauma + t.killKick * 0.6);
+        this.kick = t.killKick * 12;
+      }
     }
   }
 
@@ -78,7 +95,7 @@ export class CameraRig {
       probes.push(normalize({ x: dir.x + r.x * a + up.x * b, y: dir.y + r.y * a + up.y * b, z: dir.z + r.z * a + up.z * b }));
     }
     for (const p of probes) {
-      const hit = sim.world.raycast(head, p, want + 0.4);
+      const hit = sim.raycastAll(head, p, want + 0.4);
       if (hit) allowed = Math.min(allowed, Math.max(0.3, hit.t * dot(p, dir) - 0.35));
     }
     this.pulledIn = want - allowed;
@@ -87,8 +104,12 @@ export class CameraRig {
 
     // FOV widens with speed.
     const s = MathUtils.clamp((speed - t.fovSpeedLow) / Math.max(1e-3, t.fovSpeedHigh - t.fovSpeedLow), 0, 1);
-    const targetFov = MathUtils.lerp(t.fovMin, t.fovMax, s * s * (3 - 2 * s));
+    const grabbed = sim.mode === 'grabbed';
+    const targetFov = MathUtils.lerp(t.fovMin, t.fovMax, s * s * (3 - 2 * s)) - (grabbed ? t.grabZoom : 0);
     this.fov += (targetFov - this.fov) * (1 - Math.exp(-6 * dt));
+    this.kick *= Math.exp(-5 * dt);
+    // Held in a fist: the shake never settles.
+    if (grabbed) this.trauma = Math.max(this.trauma, t.grabShake * 0.7);
 
     // Lean into the swing: roll toward the side the cable pulls from.
     let targetRoll = 0;
@@ -109,8 +130,9 @@ export class CameraRig {
 
     this.camera.position.copy(cam);
     this.camera.rotation.copy(new Euler(pitch + ny * sh * 0.08, yaw + nx * sh * 0.08, this.roll + nz * sh * 0.05, 'YXZ'));
-    if (Math.abs(this.camera.fov - this.fov) > 1e-3) {
-      this.camera.fov = this.fov;
+    const fov = this.fov + this.kick;
+    if (Math.abs(this.camera.fov - fov) > 1e-3) {
+      this.camera.fov = fov;
       this.camera.updateProjectionMatrix();
     }
   }

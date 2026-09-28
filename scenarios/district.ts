@@ -4,15 +4,25 @@
 import type { Scenario, Policy } from '../src/sim/scenario';
 import { aimAtPoint } from '../src/sim/scenario';
 import type { Sim, Intent } from '../src/sim/sim';
-import { v3, len, sub, type Vec3 } from '../src/sim/vec';
+import { v3, len, sub, add, scale, dot, normalize, lookDir, rightOf, type Vec3 } from '../src/sim/vec';
+import type { TitanSpec } from '../src/sim/titan';
+import { nearSpawn } from './titans';
+
+/** The Titan on the avenue in sight of the spawn roof, facing the spawn (as in the live game). */
+const avenueTitan = (m: Record<string, [number, number, number]>): TitanSpec => {
+  const at = nearSpawn(m);
+  const sp = m['spawn'] ?? [0, 0, 0];
+  return { at, yaw: Math.atan2(-(sp[0] - at[0]), -(sp[2] - at[1])) };
+};
 
 export const smoke: Scenario = {
   name: 'smoke',
-  description: 'Boot at the spawn rooftop, look down the avenue, idle.',
+  description: 'Boot at the spawn rooftop, look down the avenue at the Titan, idle.',
   world: 'district',
   spawn: 'district',
   duration: 2,
-  timeline: [{ t: 0, aim: { yaw: 0, pitch: -0.12 } }],
+  titan: avenueTitan,
+  timeline: [{ t: 0, aim: { yaw: -0.1, pitch: -0.1 } }],
   browser: { shots: [1.5] },
 };
 
@@ -144,9 +154,9 @@ function perfFlight(): Policy {
   };
 }
 
-export const perf: Scenario = {
-  name: 'perf',
-  description: '60 s scripted flight at rooftop height over the densest part of the district, with hooks.',
+export const perfM1: Scenario = {
+  name: 'perf-m1',
+  description: 'Milestone 1 perf flight: 60 s at rooftop height over the densest part of the district, with hooks.',
   world: 'district',
   spawn: (m) => ({ pos: m['perf_start'] ?? [60, 28, 60], vel: [12, 0, 12], yaw: Math.atan2(-1, -1) }),
   duration: 60,
@@ -155,6 +165,83 @@ export const perf: Scenario = {
   tuning: { infiniteGas: 1, gravity: 0 },
   timeline: [],
   makePolicy: perfFlight,
+};
+
+/**
+ * Orbits a walking Titan at 90 m and 38 m up (outside its notice range), always looking at it, so the Titan and the district
+ * behind it fill the view. Boost directions are the eight combinations of forward, back and
+ * strafe; each tick picks the one closest to the acceleration the orbit needs. A hook is fired at
+ * the Titan every 3 s so cables and hook effects render too.
+ */
+function titanOrbit(): Policy {
+  const R = 90;
+  const ALT = 38;
+  const SPEED = 16;
+  let hookAt = 1;
+  let side: 'L' | 'R' = 'L';
+  return (sim: Sim, t: number) => {
+    const ti = sim.titan;
+    if (!ti) return null;
+    const c = v3(ti.x, 0, ti.z);
+    const flat = v3(sim.pos.x - c.x, 0, sim.pos.z - c.z);
+    const dist = len(flat);
+    const radial = normalize(flat, v3(1, 0, 0));
+    const tangent = v3(-radial.z, 0, radial.x);
+    const vDes = add(add(scale(tangent, SPEED), scale(radial, (R - dist) * 0.6)), v3(0, (ALT - sim.pos.y) * 1.5, 0));
+    const aDes = scale(sub(vDes, sim.vel), 2);
+    const look = aimAtPoint(sim, v3(ti.x, ti.h * 0.6, ti.z));
+    const r = rightOf(look.yaw);
+    // The look may tilt up to 0.3 rad off the Titan (it stays in frame) to give forward and back
+    // boosts a vertical component for holding altitude.
+    let best = { fa: 0, sa: 0, dp: 0, score: -Infinity };
+    for (const dp of [-0.3, 0, 0.3]) {
+      const f = lookDir(look.yaw, look.pitch + dp);
+      for (const fa of [-1, 0, 1]) {
+        for (const sa of [-1, 0, 1]) {
+          if (fa === 0 && sa === 0) continue;
+          const d = normalize(add(scale(f, fa), scale(r, sa)));
+          const score = dot(d, aDes) - Math.abs(dp) * 0.5;
+          if (score > best.score) best = { fa, sa, dp, score };
+        }
+      }
+    }
+    const thrust = len(aDes) > 1.5 && best.score > 0;
+    const out: Partial<Intent> = {
+      yaw: look.yaw,
+      pitch: look.pitch + (thrust ? best.dp : 0),
+      boost: thrust,
+      fwd: thrust && best.fa === 1,
+      back: thrust && best.fa === -1,
+      right: thrust && best.sa === 1,
+      left: thrust && best.sa === -1,
+      hookL: false,
+      hookR: false,
+    };
+    if (t >= hookAt) {
+      if (t >= hookAt + 0.5) {
+        hookAt += 3;
+        side = side === 'L' ? 'R' : 'L';
+      } else if (side === 'L') out.hookL = true;
+      else out.hookR = true;
+    }
+    return out;
+  };
+}
+
+export const perf: Scenario = {
+  name: 'perf',
+  description: '60 s orbit at 90 m and 38 m up around a walking Titan on the avenue, looking at it, with hooks.',
+  world: 'district',
+  spawn: (m) => {
+    const [x, z] = nearSpawn(m);
+    return { pos: [x + 90, 38, z], vel: [0, 0, 16], yaw: Math.PI / 2 };
+  },
+  duration: 60,
+  titan: (m) => ({ ...avenueTitan(m) }),
+  // The pilot holds its orbit with gas: no gravity, endless gas. Rendering is the real game.
+  tuning: { infiniteGas: 1, gravity: 0 },
+  timeline: [],
+  makePolicy: titanOrbit,
 };
 
 // ------------------------------------------------------------ replays
@@ -205,4 +292,4 @@ export const replayWallReel: Scenario = {
 /** Line-run time limit, set from the first working build (8.8 s) plus 25% headroom. */
 export const LINE_RUN_LIMIT_S = 11;
 
-export const districtScenarios: Scenario[] = [smoke, lineRun, perf, replaySwingChain, replayDoubleThread, replayWallReel];
+export const districtScenarios: Scenario[] = [smoke, lineRun, perf, perfM1, replaySwingChain, replayDoubleThread, replayWallReel];

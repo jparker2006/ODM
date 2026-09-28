@@ -18,10 +18,50 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #1b1916; col
 #crosshair.out span { opacity: 0.45; transform: scale(1.15); }
 #crosshair.out i { opacity: 0.45; }
 
-#gas { position: fixed; left: 50%; bottom: 36px; width: 260px; height: 8px; transform: translateX(-50%); background: rgba(0,0,0,0.45); border-radius: 4px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,0.12); }
-#gas-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #d9e6ef, #ffffff); transform-origin: left; }
+/* Meters: gas left of centre, blades right of it, labels above. */
+.meter { position: fixed; bottom: 36px; height: 8px; }
+.meter .track { position: absolute; inset: 0; background: rgba(0,0,0,0.45); border-radius: 4px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,0.12); }
+.meter .fill { height: 100%; width: 100%; transform-origin: left; }
+.meter label { position: absolute; left: 50%; bottom: 13px; transform: translateX(-50%); font-size: 10px; letter-spacing: 0.3em; color: var(--ink-dim); white-space: nowrap; }
+#gas { right: calc(50% + 8px); width: 240px; }
+#gas-fill { background: linear-gradient(90deg, #d9e6ef, #ffffff); }
 #gas.low #gas-fill { background: var(--warn); }
-#gas label { position: fixed; left: 50%; bottom: 48px; transform: translateX(-50%); font-size: 10px; letter-spacing: 0.3em; color: var(--ink-dim); }
+#blades { left: calc(50% + 8px); width: 150px; }
+#blades-fill { background: linear-gradient(90deg, #9fb3c4, #e9f3fb); }
+#blades.dull #blades-fill { background: var(--warn); }
+#blades.refill .fill, #gas.refill .fill { box-shadow: inset 0 0 0 2px #ffcf6b; }
+
+#kills { position: fixed; right: 22px; top: 18px; text-align: right; }
+#kills-n { display: block; font: 600 26px/1 ui-sans-serif, -apple-system, sans-serif; }
+#kills label { font-size: 10px; letter-spacing: 0.3em; color: var(--ink-dim); }
+#kills.bump #kills-n { animation: bump 500ms ease-out; }
+@keyframes bump { 0% { transform: scale(1.7); color: #ff7a52; } 100% { transform: scale(1); } }
+
+/* Hit marker: four diagonal ticks around the crosshair; a kill is bigger, red, and lingers. */
+#hitmark { position: fixed; left: 50%; top: 50%; width: 34px; height: 34px; transform: translate(-50%, -50%) rotate(45deg); pointer-events: none; opacity: 0; }
+#hitmark b { position: absolute; background: var(--ink); box-shadow: 0 0 2px rgba(0,0,0,0.6); }
+#hitmark b:nth-child(1) { left: 50%; top: 0; width: 2px; height: 9px; margin-left: -1px; }
+#hitmark b:nth-child(2) { left: 50%; bottom: 0; width: 2px; height: 9px; margin-left: -1px; }
+#hitmark b:nth-child(3) { top: 50%; left: 0; height: 2px; width: 9px; margin-top: -1px; }
+#hitmark b:nth-child(4) { top: 50%; right: 0; height: 2px; width: 9px; margin-top: -1px; }
+#hitmark.hit { animation: hitfade 260ms ease-out forwards; }
+#hitmark.kill { width: 54px; height: 54px; animation: killfade 900ms ease-out forwards; }
+#hitmark.kill b { background: #ff5a36; }
+#hitmark.kill b:nth-child(-n+2) { width: 3px; height: 16px; }
+#hitmark.kill b:nth-child(n+3) { height: 3px; width: 16px; }
+@keyframes hitfade { 0% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes killfade { 0% { opacity: 1; transform: translate(-50%, -50%) rotate(45deg) scale(1.5); } 30% { opacity: 1; transform: translate(-50%, -50%) rotate(45deg) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50%) rotate(45deg) scale(1); } }
+
+#grab { position: fixed; left: 50%; top: 62%; transform: translateX(-50%); text-align: center; pointer-events: none; }
+#grab[hidden] { display: none; }
+#grab b { display: block; font-size: 18px; letter-spacing: 0.4em; color: #ff6a45; text-shadow: 0 0 12px rgba(255, 80, 40, 0.6); animation: pulse 400ms ease-in-out infinite alternate; }
+#grab small { display: block; margin-top: 6px; font-size: 11px; letter-spacing: 0.2em; color: var(--ink); }
+#escape { width: 220px; height: 10px; margin: 8px auto 0; background: rgba(0,0,0,0.55); border-radius: 5px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,0.2); }
+#escape-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #ffb35c, #ffe7a8); transform-origin: left; transform: scaleX(0); }
+@keyframes pulse { from { opacity: 0.7; } to { opacity: 1; } }
+
+#supply { position: fixed; left: 50%; bottom: 62px; transform: translateX(-50%); font-size: 11px; letter-spacing: 0.3em; color: #ffcf6b; }
+#supply[hidden] { display: none; }
 
 #overlay { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(15, 13, 11, 0.55); backdrop-filter: blur(3px); cursor: pointer; }
 #overlay.loading { cursor: progress; background: #1b1916; }

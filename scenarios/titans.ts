@@ -18,7 +18,7 @@ export const YARD: FixtureBox[] = [
   { name: 'hide-wall', min: [-20, 0, -72], max: [20, 18, -66] },
   { name: 'roof-block', min: [50, 0, 40], max: [70, 15, 60] },
   { name: 'supply-block', min: [-60, 0, 30], max: [-48, 6, 42] },
-  { name: 'supply-crate', min: [-55, 6, 35], max: [-53.4, 7, 36.6] },
+  { name: 'supply-crate', kind: 'supply', min: [-55, 6, 35], max: [-53.4, 7, 36.6] },
   { name: 'pole', min: [80, 0, -40], max: [81, 30, -39] },
 ];
 const YARD_SUPPLY: [number, number, number] = [-54.2, 7, 35.8];
@@ -69,14 +69,14 @@ export const titanStreet: Scenario = {
   name: 'titan-street',
   description: 'A 16 m street between 15 m buildings, with a Titan walking toward the player.',
   world: STREET,
-  spawn: { pos: [-12, 15 + STAND, 40], yaw: 0 },
+  spawn: { pos: [-9.5, 15 + STAND, 40], yaw: 0 },
   duration: 20,
-  titan: { at: [0, -80], yaw: Math.PI },
+  titan: { at: [0, -25], yaw: Math.PI },
   titanSpawns: [
     [0, -250],
     [0, 250],
   ],
-  timeline: [{ t: 0, aim: { yaw: -0.15, pitch: -0.05 } }],
+  timeline: [{ t: 0, aim: { yaw: -0.12, pitch: -0.12 } }],
   browser: { shots: [2] },
 };
 
@@ -164,14 +164,15 @@ const POLE_HOOK: [number, number, number] = [80.5, 11, -39];
 /** Hangs from the pole in front of a Titan that walks up and grabs. */
 const grabSetup = {
   ...yard,
-  spawn: { pos: [80.5, 9.5, -37] as [number, number, number], yaw: 0 },
+  spawn: { pos: [80.5, 9.5, -37] as [number, number, number], yaw: Math.PI },
   titan: { at: [80.5, -10] as [number, number], yaw: 0, wander: false },
 };
 
 const hangTimeline = [
   { t: 0, aimAt: POLE_HOOK },
   { t: 0.05, set: { hookL: true } },
-  { t: 0.3, aim: { yaw: 0, pitch: -0.1 } },
+  // Turn to face the Titan walking up from behind.
+  { t: 0.3, aim: { yaw: Math.PI, pitch: 0.05 } },
 ];
 
 export const titanGrab: Scenario = {
@@ -180,6 +181,7 @@ export const titanGrab: Scenario = {
   ...grabSetup,
   duration: 8,
   timeline: hangTimeline,
+  browser: { shots: [3.0, 4.3, 4.66, 5.5] },
 };
 
 /** Waits for the wind-up, then lets go and boosts away sideways. */
@@ -324,7 +326,7 @@ export const napeKill: Scenario = {
   duration: 17,
   timeline: [],
   makePolicy: napePolicy({ reel: true, target: 'nape' }),
-  browser: { replayEvery: 3 },
+  browser: { replayEvery: 3, shots: [0.5, 0.84, 1.6, 2.6, 4.0] },
 };
 
 export const napeSlow: Scenario = {
@@ -376,8 +378,10 @@ export const supplyLeave: Scenario = {
 
 // ------------------------------------------------------------ district with a Titan
 
-/** The titan spawn marker nearest the player spawn (the one in sight of the spawn roof). */
+/** The titan spawn marker in sight of the spawn roof (on the avenue), else the nearest one. */
 export function nearSpawn(m: Markers): [number, number] {
+  const avenue = m['titan_spawn_avenue'];
+  if (avenue) return [avenue[0], avenue[2]];
   const s = m['spawn'] ?? [0, 0, 0];
   const pts = markersWithPrefix(m, 'titan_spawn_');
   let best = pts[0] ?? [0, 0, -200];

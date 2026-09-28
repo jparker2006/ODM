@@ -9,6 +9,14 @@
   },
   "state": "ready",
   "logs": [],
+  "titan": {
+    "brain": "wander",
+    "x": 0.1385707330513228,
+    "z": -195.003528844068,
+    "yaw": -3.1110886496961507,
+    "h": 12,
+    "visible": true
+  },
   "telemetry": {
     "pos": [
       -12,

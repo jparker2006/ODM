@@ -45,7 +45,8 @@ export function fixtureMesh(boxes: WorldBox[]): Object3D {
     const sz = b.max.z - b.min.z;
     const g = new BoxGeometry(sx, sy, sz);
     g.translate((b.min.x + b.max.x) / 2, (b.min.y + b.max.y) / 2, (b.min.z + b.max.z) / 2);
-    const key = b.kind === 'ground' ? 'mat_ground' : b.kind === 'wall' ? 'mat_wall' : b.kind === 'tower' ? 'mat_tower' : 'mat_fixture';
+    const key =
+      b.kind === 'ground' ? 'mat_ground' : b.kind === 'wall' ? 'mat_wall' : b.kind === 'tower' ? 'mat_tower' : b.kind === 'supply' ? 'mat_supply' : 'mat_fixture';
     const list = byKind.get(key) ?? [];
     list.push(g);
     byKind.set(key, list);
