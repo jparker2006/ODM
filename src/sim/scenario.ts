@@ -1,7 +1,8 @@
 // Scenarios: a world, a spawn, a seed and an input timeline. The same scenario runs headless
 // (tests, telemetry) and in the real game (screenshots, frame timings, replays).
 
-import { Sim, DT, idleIntent, type Intent, type Spawn, type TelemetryFrame } from './sim';
+import { Sim, DT, idleIntent, type Intent, type Spawn, type TelemetryFrame, type SimOptions } from './sim';
+import type { TitanSpec } from './titan';
 import { World, type WorldBox, type BoxKind } from './world';
 import { makeTuning, type Tuning } from './tuning';
 import { type Vec3, v3, sub, yawPitchOf } from './vec';
@@ -32,6 +33,8 @@ export interface SpawnSpec {
   vel?: [number, number, number];
   yaw: number;
   pitch?: number;
+  gas?: number;
+  blades?: number;
 }
 
 /** Closed-loop control for scenarios that need to react to where the player is (deterministic). */
@@ -48,6 +51,12 @@ export interface Scenario {
   seed?: number;
   tuning?: Partial<Tuning>;
   timeline: Keyframe[];
+  /** The Titan. Fixture worlds and district scenarios have none unless they declare one. */
+  titan?: TitanSpec | ((markers: Markers) => TitanSpec) | null;
+  /** Respawn points [x, z]. Default: the district's titan_spawn_* markers (none in fixture worlds). */
+  titanSpawns?: [number, number][];
+  /** Supply crate points. Default: the district's supply_* markers (none in fixture worlds). */
+  supplies?: [number, number, number][];
   /** Creates fresh closed-loop control for each run, so runs never share state. */
   makePolicy?: () => Policy;
   /** Browser runner options. */
@@ -103,7 +112,26 @@ export function resolveSpawn(s: Scenario, district: DistrictData | null): Spawn 
     vel: spec.vel ? v3(...spec.vel) : undefined,
     yaw: spec.yaw,
     pitch: spec.pitch ?? 0,
+    gas: spec.gas,
+    blades: spec.blades,
   };
+}
+
+/** Marker points whose names start with a prefix, in name order. */
+export function markersWithPrefix(markers: Markers, prefix: string): [number, number, number][] {
+  return Object.keys(markers)
+    .filter((k) => k.startsWith(prefix))
+    .sort()
+    .map((k) => markers[k]!);
+}
+
+/** The Titan, respawn points and supply crates for a scenario. */
+export function resolveOptions(s: Scenario, district: DistrictData | null): SimOptions {
+  const markers = (district?.markers ?? {}) as Markers;
+  const titan = typeof s.titan === 'function' ? s.titan(markers) : (s.titan ?? null);
+  const titanSpawns = s.titanSpawns ?? (s.world === 'district' ? markersWithPrefix(markers, 'titan_spawn_').map((m) => [m[0], m[2]] as [number, number]) : []);
+  const supplies = (s.supplies ?? (s.world === 'district' ? markersWithPrefix(markers, 'supply_') : [])).map((p) => v3(...p));
+  return { titan, titanSpawns, supplies, seed: s.seed ?? 1 };
 }
 
 export function buildWorld(s: Scenario, district: DistrictData | null): World {
@@ -178,7 +206,7 @@ export function runScenario(s: Scenario, district: DistrictData | null, extraTun
   const world = buildWorld(s, district);
   const tuning = makeTuning({ ...s.tuning, ...extraTuning });
   const spawn = resolveSpawn(s, district);
-  const sim = new Sim(world, tuning, spawn);
+  const sim = new Sim(world, tuning, spawn, resolveOptions(s, district));
   const player = new TimelinePlayer(s, spawn);
   const frames: TelemetryFrame[] = [];
   const ticks = Math.round(s.duration / DT);

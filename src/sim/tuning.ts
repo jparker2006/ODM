@@ -100,6 +100,50 @@ export const PARAMS = {
   chainBonus: p('Assists', 'Top speed bonus per chained swing', 'm/s', 2, 0, 10, 0.25),
   chainMax: p('Assists', 'Maximum chain count', 'count', 4, 0, 10, 1),
 
+  // Titan (Milestone 2). Values from docs/SPEC-M2.md "New tuning constants"; values the spec left
+  // open are marked "chosen" and listed in the Milestone 2 handoff.
+  titanHeight: p('Titan', 'First Titan height', 'm', 12, 7, 15, 0.5),
+  titanHeightMin: p('Titan', 'Respawn height, lowest', 'm', 7, 3, 15, 0.5),
+  titanHeightMax: p('Titan', 'Respawn height, highest (also sizes the walkable grid)', 'm', 15, 7, 15, 0.5, true),
+  wanderSpeed: p('Titan', 'Wander speed', 'm/s', 2.5, 0.5, 8, 0.1),
+  chaseSpeed: p('Titan', 'Chase speed', 'm/s', 6.5, 1, 15, 0.1),
+  titanTurnRate: p('Titan', 'Turn rate', 'deg/s', 70, 10, 360, 5),
+  wanderRadius: p('Titan', 'Wander target radius (spec: about 150)', 'm', 150, 20, 400, 5),
+  wanderPause: p('Titan', 'Pause between wander legs, up to (chosen)', 's', 3, 0, 10, 0.25),
+  chaseRepath: p('Titan', 'Chase re-path interval (chosen)', 's', 0.3, 0.05, 2, 0.05),
+  noticeRange: p('Titan', 'Notice range', 'm', 70, 10, 200, 1),
+  noticeFov: p('Titan', 'Notice field of view', 'deg', 130, 30, 360, 5),
+  noiseRange: p('Titan', 'Gas noise range', 'm', 35, 0, 150, 1),
+  noticeTime: p('Titan', 'Turn toward the player on noticing (chosen)', 's', 0.6, 0, 3, 0.05),
+  loseInterest: p('Titan', 'Lose interest after', 's', 8, 1, 60, 0.5),
+  flinchTime: p('Titan', 'Flinch duration (chosen)', 's', 0.8, 0.1, 3, 0.05),
+  collapseTime: p('Titan', 'Collapse duration (chosen)', 's', 2.5, 0.5, 6, 0.1),
+  respawnDelay: p('Titan', 'Respawn delay', 's', 12, 1, 60, 0.5),
+  respawnMinDistance: p('Titan', 'Respawn at least this far from the player (goal: 150)', 'm', 150, 0, 600, 5),
+
+  // Grab
+  grabReach: p('Grab', 'Grab reach (from the shoulder)', 'x height', 0.6, 0.2, 1, 0.01),
+  grabFacing: p('Grab', 'Grab only within this angle of facing (chosen)', 'deg', 60, 10, 180, 5),
+  grabWindup: p('Grab', 'Grab wind-up', 's', 0.7, 0.2, 2, 0.05),
+  grabClose: p('Grab', 'Hand closing after a missed grab (chosen)', 's', 0.25, 0.05, 1, 0.05),
+  grabRecover: p('Grab', 'Arm return after a grab (chosen)', 's', 0.6, 0.1, 2, 0.05),
+  grabCooldown: p('Grab', 'Grab cooldown (from the strike)', 's', 2.5, 0, 10, 0.1),
+  maxHold: p('Grab', 'Max hold', 's', 3, 0.5, 10, 0.1),
+  escapePresses: p('Grab', 'Escape presses', 'presses', 8, 1, 30, 1),
+  escapeDecay: p('Grab', 'Escape press decay (chosen)', 'presses/s', 1.5, 0, 10, 0.1),
+  escapePenalty: p('Grab', 'Gas lost on a failed escape', 'of capacity', 0.25, 0, 1, 0.01),
+  throwSpeed: p('Grab', 'Throw speed', 'm/s', 12, 0, 40, 0.5),
+  regrabGrace: p('Grab', 'Re-grab grace', 's', 2, 0, 10, 0.1),
+
+  // Blades
+  slashActive: p('Blades', 'Slash active window', 's', 0.25, 0.05, 1, 0.01),
+  slashCooldown: p('Blades', 'Slash cooldown', 's', 0.45, 0.05, 2, 0.01),
+  bladeReach: p('Blades', 'Blade reach', 'm', 2.2, 0.5, 6, 0.1),
+  napeKillSpeed: p('Blades', 'Nape kill speed (relative)', 'm/s', 15, 0, 50, 0.5),
+  bladeWear: p('Blades', 'Blade wear per hit', 'of full', 0.08, 0, 1, 0.01),
+  supplyRadius: p('Blades', 'Supply radius', 'm', 3, 0.5, 10, 0.1),
+  supplyRefill: p('Blades', 'Supply refill time', 's', 1.5, 0.1, 10, 0.1),
+
   // Camera and controls (read by the renderer; the aim ray also uses the boom offsets)
   camDistance: p('Camera', 'Boom distance', 'm', 3.6, 1.5, 8, 0.1),
   camHeight: p('Camera', 'Boom height', 'm', 0.8, 0, 3, 0.05),
@@ -111,6 +155,11 @@ export const PARAMS = {
   fovSpeedHigh: p('Camera', 'Speed for maximum FOV', 'm/s', 40, 5, 80, 0.5),
   camLean: p('Camera', 'Swing lean', 'deg', 7, 0, 25, 0.5),
   shakeImpact: p('Camera', 'Impact shake', 'strength', 0.35, 0, 2, 0.05),
+  stepShake: p('Camera', 'Titan footstep shake at 20 m', 'strength', 0.25, 0, 2, 0.05),
+  stepShakeRange: p('Camera', 'Titan footsteps felt out to (chosen)', 'm', 90, 20, 300, 5),
+  grabShake: p('Camera', 'Shake while grabbed (chosen)', 'strength', 0.5, 0, 2, 0.05),
+  grabZoom: p('Camera', 'Zoom in while grabbed (chosen)', 'deg', 8, 0, 30, 1),
+  killKick: p('Camera', 'Nape-kill impact kick (chosen)', 'strength', 0.8, 0, 3, 0.05),
   mouseSensitivity: p('Controls', 'Mouse sensitivity', 'rad/px', 0.0022, 0.0005, 0.01, 0.0001),
   invertY: p('Controls', 'Invert Y (0 off, 1 on)', 'toggle', 0, 0, 1, 1),
 

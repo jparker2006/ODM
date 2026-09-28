@@ -120,7 +120,7 @@ const POSES: Record<'idle' | 'air' | 'swing' | 'reel' | 'wall' | 'stumble' | 'ro
   },
 };
 
-export type PoseName = keyof typeof POSES | 'run';
+export type PoseName = keyof typeof POSES | 'run' | 'slash' | 'grabbed';
 
 export class Mannequin {
   readonly root: Object3D;
@@ -130,6 +130,7 @@ export class Mannequin {
   private facing = new Quaternion();
   private runPhase = 0;
   private rollAngle = 0;
+  private time = 0;
   pose: PoseName = 'idle';
 
   constructor(model: Object3D) {
@@ -147,7 +148,9 @@ export class Mannequin {
     });
   }
 
-  static poseFor(mode: Mode, speed: number, thrusting: boolean): PoseName {
+  static poseFor(mode: Mode, speed: number, thrusting: boolean, slashing = false): PoseName {
+    if (mode === 'grabbed') return 'grabbed';
+    if (slashing) return 'slash';
     if (mode === 'ground') return speed > 1.2 ? 'run' : 'idle';
     if (mode === 'air') return thrusting ? 'boost' : 'air';
     return mode;
@@ -155,7 +158,8 @@ export class Mannequin {
 
   update(sim: Sim, pos: Vec3, vel: Vec3, dt: number): void {
     const speed = len(vel);
-    this.pose = Mannequin.poseFor(sim.mode, len({ x: vel.x, y: 0, z: vel.z }), sim.thrusting);
+    this.pose = Mannequin.poseFor(sim.mode, len({ x: vel.x, y: 0, z: vel.z }), sim.thrusting, sim.slashT >= 0);
+    this.time += dt;
     this.root.position.set(pos.x, pos.y - sim.tuning.bodyHeight / 2, pos.z);
 
     // Facing: travel direction when moving, otherwise the camera.
@@ -165,7 +169,10 @@ export class Mannequin {
     let fwd = hs > 2 ? normalize(hv) : cam;
     let up: Vec3 = { x: 0, y: 1, z: 0 };
     const taut = sim.hooks.filter((h) => h.state === 'attached' && h.taut && h.anchor);
-    if (sim.mode === 'wall') {
+    if (sim.mode === 'grabbed' && sim.titan) {
+      // Held in the fist, facing the Titan's face.
+      fwd = normalize({ x: sim.titan.x - pos.x, y: 0, z: sim.titan.z - pos.z }, cam);
+    } else if (sim.mode === 'wall') {
       fwd = normalize({ x: -sim.wallNormal.x, y: 0, z: -sim.wallNormal.z });
     } else if (taut.length > 0) {
       // Hang from the cable: body up axis points at the anchors.
@@ -198,7 +205,39 @@ export class Mannequin {
 
     // Joint targets.
     let target2: Pose;
-    if (this.pose === 'run') {
+    if (this.pose === 'slash') {
+      // Both blades sweep across the body from wide to crossed over the active window.
+      const k = MathUtils.clamp(sim.slashT / Math.max(1e-3, sim.tuning.slashActive), 0, 1);
+      const e = k * k * (3 - 2 * k);
+      target2 = {
+        mq_spine: [0.25, MathUtils.lerp(0.55, -0.55, e), 0],
+        mq_head: [-0.15, MathUtils.lerp(-0.3, 0.3, e), 0],
+        mq_upperarm_L: [-1.45, 0, MathUtils.lerp(-1.7, 0.5, e)],
+        mq_upperarm_R: [-1.45, 0, MathUtils.lerp(1.7, -0.5, e)],
+        mq_forearm_L: [-0.15, 0, 0],
+        mq_forearm_R: [-0.15, 0, 0],
+        mq_thigh_L: [-0.9, 0, -0.1],
+        mq_thigh_R: [-0.5, 0, 0.1],
+        mq_shin_L: [1.2, 0, 0],
+        mq_shin_R: [0.8, 0, 0],
+      };
+    } else if (this.pose === 'grabbed') {
+      // Struggling in the fist: arms braced up against the fingers, legs kicking.
+      const w = Math.sin(this.time * 13);
+      const w2 = Math.sin(this.time * 17 + 1.1);
+      target2 = {
+        mq_spine: [0.1 + 0.1 * w2, 0.15 * w, 0],
+        mq_head: [-0.35, 0.2 * w2, 0],
+        mq_upperarm_L: [-2.5 + 0.35 * w, 0, -0.5],
+        mq_upperarm_R: [-2.5 - 0.35 * w, 0, 0.5],
+        mq_forearm_L: [-0.9 + 0.3 * w2, 0, 0],
+        mq_forearm_R: [-0.9 - 0.3 * w2, 0, 0],
+        mq_thigh_L: [-0.6 + 0.5 * w2, 0, -0.1],
+        mq_thigh_R: [-0.6 - 0.5 * w2, 0, 0.1],
+        mq_shin_L: [0.9, 0, 0],
+        mq_shin_R: [0.9, 0, 0],
+      };
+    } else if (this.pose === 'run') {
       this.runPhase += dt * Math.max(6, hs * 1.3);
       const s = Math.sin(this.runPhase);
       const c = Math.cos(this.runPhase);
@@ -216,7 +255,8 @@ export class Mannequin {
     } else {
       target2 = POSES[this.pose];
     }
-    const k = 1 - Math.exp(-(this.pose === 'run' ? 30 : 12) * dt);
+    const rate = this.pose === 'run' || this.pose === 'slash' ? 30 : this.pose === 'grabbed' ? 20 : 12;
+    const k = 1 - Math.exp(-rate * dt);
     for (const j of JOINTS) {
       const o = this.joints.get(j);
       if (!o) continue;
