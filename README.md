@@ -1,0 +1,63 @@
+# ODM
+
+A private browser game: Levi on ODM gear in an evacuated, walled medieval district, built to find out how close Claude Opus can get to a AAA look and feel. Three.js with WebGPU, TypeScript, and Blender for every asset.
+
+**Status:** Milestone 1, "Gear". ODM traversal in a to-scale greybox district. It's a feel test, with no Titans and no art yet. The contract is in [docs/SPEC.md](docs/SPEC.md), the milestone's done-criteria are in [docs/GOAL.md](docs/GOAL.md), and the latest handoff is [docs/handoff/M1.md](docs/handoff/M1.md).
+
+## Play
+
+This needs Node 22 or newer and a browser with WebGPU. Current Chrome and Safari on an Apple silicon Mac both work.
+
+```sh
+npm ci
+npm run dev
+```
+
+Open http://127.0.0.1:5180 and click to play.
+
+- `?play=<scenario>` plays live in a scenario's test world, for example `?play=hook-attach`, which has flat ground and a wall ahead.
+- `?scenario=<scenario>` watches a scripted run, for example `?scenario=replay-swing-chain`.
+
+## Controls
+
+| Input | Action |
+|---|---|
+| Mouse | Aim and camera |
+| Left click (hold) | Left hook |
+| Right click (hold) | Right hook |
+| Shift (hold) | Reel in (spends gas) |
+| Space | Gas boost in the air, jump on the ground, push off a wall |
+| WASD | Steer in the air, run on the ground |
+| R | Reset to spawn |
+| Esc | Pause |
+| F3 | Performance overlay: frame time, render scale, GPU time per pass |
+| F4 | Tuning panel: every feel constant, live, with a before and after export |
+
+The crosshair has three states:
+- **Solid teal:** a hook fired now will catch.
+- **Dashed:** aim assist will snap the hook to a nearby edge.
+- **Faded:** out of range, or nothing to catch.
+
+## Develop
+
+| Command | What it does |
+|---|---|
+| `npm run check` | Typecheck, lint (including the no-em-dash rule), and every Vitest test: unit, asset contracts and the headless scenario suite |
+| `npm run assets` | Rebuild `public/assets/*.glb` with Blender 5.2, run headless. After an intended change, update `tests/unit/asset-hashes.json` |
+| `npm run assets:check` | Build every asset twice and confirm byte-identical output |
+| `npm run browser` | The full browser suite in real Chrome on the Apple GPU (smoke, no-WebGPU, perf, replays, features). Evidence goes to `evidence/` |
+| `npm run smoke` / `perf` / `replays` / `features` | One part of the browser suite |
+
+## Layout
+
+| Path | Contents |
+|---|---|
+| `src/sim/` | The simulation core. Pure TypeScript: no three.js, no DOM. Runs at a fixed 120 Hz and identically in Node. Every feel constant lives in `src/sim/tuning.ts` |
+| `src/render/` | Renderer, greybox materials, camera rig, mannequin, gear effects |
+| `src/game/` | Game loop, input, and the `window.__odm` automation handle |
+| `src/ui/` | HUD, tuning panel, performance overlay |
+| `src/audio/` | Synthesized sound |
+| `scenarios/` | Named scenarios, each a world, spawn and input timeline, shared by the headless tests and the browser runner |
+| `tools/blender/` | Deterministic asset scripts |
+| `tools/runner/` | The Playwright browser runner |
+| `STATUS.md` | Progress log |
