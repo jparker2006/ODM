@@ -210,7 +210,11 @@ async function perf() {
   const suffix = uncapped ? '' : '-vsync';
   writeFileSync(resolve(EVIDENCE, 'perf', `perf${suffix}.json`), JSON.stringify(result, null, 2));
   const quiet = Math.max(loadStart[0], result.loadAverage[0]) < 10;
-  (quiet ? pass : fail)(`perf: load average ${loadStart[0]} at start, ${result.loadAverage[0]} at end (must stay under about 10)`);
+  // ODM_PERF_ANY_LOAD=1 records a busy-machine run without failing it (only when Jake asks for one).
+  const loadMsg = `perf: load average ${loadStart[0]} at start, ${result.loadAverage[0]} at end (quiet means under about 10)`;
+  if (quiet) pass(loadMsg);
+  else if (process.env.ODM_PERF_ANY_LOAD === '1') console.log(`NOTE ${loadMsg}; run on a busy machine at Jake's request`);
+  else fail(loadMsg);
   const line = `avg ${result.avgFps} fps, 1% low ${result.onePercentLowFps} fps, max frame ${result.maxFrameMs} ms, min render scale ${result.minRenderScale}`;
   if (avgFps < 60) fail(`perf: average ${avgFps.toFixed(1)} fps < 60 (${line})`);
   if (low1 < 45) fail(`perf: 1% low ${low1.toFixed(1)} fps < 45 (${line})`);

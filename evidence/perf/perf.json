@@ -1,10 +1,15 @@
 {
-  "date": "2026-09-28T18:29:21.444Z",
+  "date": "2026-09-29T02:22:53.085Z",
   "machine": "MacBook Air M4 16 GB, Google Chrome, vsync and frame-rate limit off",
+  "loadAverageStart": [
+    13.44,
+    12.04,
+    9.67
+  ],
   "loadAverage": [
-    13.42,
-    17.05,
-    33.95
+    59.92,
+    23,
+    13.68
   ],
   "viewport": "1470x956 @2x",
   "adapter": {
@@ -16,40 +21,84 @@
     "timestamps": true
   },
   "simSeconds": 60,
-  "wallSeconds": 13.855,
+  "wallSeconds": 18.924,
   "frames": 3599,
-  "avgFps": 261.6,
-  "onePercentLowFps": 96.9,
-  "p99Ms": 6.4,
-  "maxFrameMs": 38.7,
+  "avgFps": 191.1,
+  "onePercentLowFps": 46.5,
+  "p99Ms": 15.4,
+  "maxFrameMs": 58,
   "minRenderScale": 1,
   "cameraInsideGeometryFrames": 0,
+  "cameraInsideTitanFrames": 0,
+  "titanOnScreenFraction": 1,
   "spikes": [
     {
-      "frame": 2671,
-      "simT": 44.52,
-      "ms": 38.7,
-      "prevJsMs": 2.4
+      "frame": 26,
+      "simT": 0.43,
+      "ms": 26.9,
+      "prevJsMs": 5.8
     },
     {
-      "frame": 3453,
-      "simT": 57.55,
-      "ms": 38.5,
-      "prevJsMs": 49.7
+      "frame": 51,
+      "simT": 0.85,
+      "ms": 31.5,
+      "prevJsMs": 5.8
+    },
+    {
+      "frame": 53,
+      "simT": 0.88,
+      "ms": 28.7,
+      "prevJsMs": 5.9
+    },
+    {
+      "frame": 56,
+      "simT": 0.93,
+      "ms": 28.9,
+      "prevJsMs": 4.6
+    },
+    {
+      "frame": 303,
+      "simT": 5.05,
+      "ms": 31.1,
+      "prevJsMs": 5.1
+    },
+    {
+      "frame": 331,
+      "simT": 5.52,
+      "ms": 58,
+      "prevJsMs": 8.3
+    },
+    {
+      "frame": 362,
+      "simT": 6.03,
+      "ms": 25.8,
+      "prevJsMs": 4.6
+    },
+    {
+      "frame": 1775,
+      "simT": 29.58,
+      "ms": 38.2,
+      "prevJsMs": 4.1
+    },
+    {
+      "frame": 1776,
+      "simT": 29.6,
+      "ms": 26.9,
+      "prevJsMs": 3.6
     }
   ],
-  "jsMsAvg": 3.07,
-  "jsMsMax": 49.7,
+  "jsMsAvg": 4.27,
+  "jsMsMax": 14.5,
   "gpuLastSample": {
-    "total": 8.270957,
+    "total": 124.17694,
     "passes": [
       {
         "label": "scene",
-        "ms": 3.229701
+        "ms": 41.000625
       },
       {
         "label": "shadow",
-        "ms": 5.041256000000001
+        "ms": 83.176315
       }
     ]
   },

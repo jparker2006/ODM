@@ -1,10 +1,15 @@
 {
-  "date": "2026-09-28T18:33:47.564Z",
+  "date": "2026-09-29T02:24:09.463Z",
   "machine": "MacBook Air M4 16 GB, Google Chrome, vsync on",
+  "loadAverageStart": [
+    52.43,
+    23.11,
+    13.88
+  ],
   "loadAverage": [
-    7.45,
-    11.54,
-    26.85
+    33.7,
+    23.1,
+    14.51
   ],
   "viewport": "1470x956 @2x",
   "adapter": {
@@ -16,27 +21,42 @@
     "timestamps": true
   },
   "simSeconds": 60,
-  "wallSeconds": 60.088,
+  "wallSeconds": 60.275,
   "frames": 3599,
-  "avgFps": 60,
-  "onePercentLowFps": 53.2,
-  "p99Ms": 18.7,
-  "maxFrameMs": 18.8,
+  "avgFps": 59.8,
+  "onePercentLowFps": 45.4,
+  "p99Ms": 16.8,
+  "maxFrameMs": 166.6,
   "minRenderScale": 1,
   "cameraInsideGeometryFrames": 0,
-  "spikes": [],
-  "jsMsAvg": 1.58,
-  "jsMsMax": 4.5,
+  "cameraInsideTitanFrames": 0,
+  "titanOnScreenFraction": 1,
+  "spikes": [
+    {
+      "frame": 971,
+      "simT": 16.18,
+      "ms": 166.6,
+      "prevJsMs": 116.2
+    },
+    {
+      "frame": 972,
+      "simT": 16.2,
+      "ms": 50,
+      "prevJsMs": 42.2
+    }
+  ],
+  "jsMsAvg": 3.1,
+  "jsMsMax": 116.2,
   "gpuLastSample": {
-    "total": 2.942457,
+    "total": 10.944751,
     "passes": [
       {
         "label": "scene",
-        "ms": 1.854889
+        "ms": 5.267295
       },
       {
         "label": "shadow",
-        "ms": 1.087568
+        "ms": 5.677455999999999
       }
     ]
   },

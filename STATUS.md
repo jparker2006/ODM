@@ -72,4 +72,7 @@ Progress log. Append after every working session: what was done, what failed, wh
 - *The M1 camera-lean check probed side-swing at 1.0 s,* but with the auto-pull (added when M1 closed) the cable only goes taut at 1.1 s. The probe moved to 1.4 s; the lean itself is unchanged.
 - *Supply coverage of 150 m everywhere is impossible with 8 crates* (it needs about 38). The measured worst case is 394 m. Flagged for Jake.
 
+- *Perf could not get a quiet machine.* Another session's builds kept the load between 20 and 60 for over two hours. At Jake's request, perf ran anyway (`ODM_PERF_ANY_LOAD=1`), load 13 to 60: 191 fps average, 1% low 46.5, worst frame 58 ms, scale 1.0, Titan on screen 100%. The vsync reference had one 167 ms main-thread stall at load 52.
+- *Jake asked for no visible Chrome windows.* The runner is headless now, and the adapter is still the Apple GPU.
+
 **Next:** Jake's feel review of M2 (`docs/handoff/M2.md`).
