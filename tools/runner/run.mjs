@@ -39,7 +39,9 @@ async function serve() {
 async function launch({ uncapped = false } = {}) {
   const args = ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist'];
   if (uncapped) args.push('--disable-gpu-vsync', '--disable-frame-rate-limit');
-  return chromium.launch({ channel: 'chrome', headless: false, args });
+  // Headless by default: it still gets the real Apple GPU (the adapter check proves it) and never
+  // opens a window over the desktop. ODM_HEADED=1 shows the window.
+  return chromium.launch({ channel: 'chrome', headless: process.env.ODM_HEADED !== '1', args });
 }
 
 async function openPage(browser, query, { noWebGpu = false } = {}) {

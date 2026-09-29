@@ -186,7 +186,7 @@
         -3.7069934809621836
       ]
     },
-    "steam": 194
+    "steam": 191
   },
   "insideTitan:body-slash": 0,
   "insideTitan:grab-escape": 0,
@@ -201,7 +201,7 @@
       "supplying": false,
       "marker": {
         "kind": "hit",
-        "at": 4796
+        "at": 2751.2000000011176
       },
       "crosshair": "in"
     },
@@ -213,7 +213,7 @@
       "supplying": false,
       "marker": {
         "kind": "kill",
-        "at": 5057.800000000745
+        "at": 3411.0999999996275
       },
       "crosshair": "in"
     },
@@ -345,13 +345,13 @@
   "live": {
     "crosshair": "in",
     "hook": {
-      "state": "stowed",
-      "part": -1
+      "state": "attached",
+      "part": 1
     },
-    "slash": 0,
-    "grabbed": false,
-    "escaped": false,
-    "mashMs": 3
+    "slash": 1,
+    "grabbed": true,
+    "escaped": true,
+    "mashMs": 519
   },
   "audio": {
     "slash-swish": 3,

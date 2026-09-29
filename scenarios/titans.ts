@@ -184,7 +184,7 @@ export const grabLedge: Scenario = {
   name: 'grab-ledge',
   description: 'Standing at the edge of an 8 m roof, a Titan 33 m away walks up and grabs.',
   ...yard,
-  spawn: { pos: [36.4, 8 + STAND, -14], yaw: -Math.PI / 2, pitch: 0 },
+  spawn: { pos: [36.4, 8 + STAND, -14], yaw: -Math.PI / 2, pitch: -0.06 },
   duration: 12,
   titan: { at: [70, -14], yaw: Math.PI / 2, wander: false },
   timeline: [],

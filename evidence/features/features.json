@@ -35,7 +35,7 @@
       "t": 3.2,
       "want": "run",
       "got": "run",
-      "fov": 60.00017389771405,
+      "fov": 60.000042882648316,
       "speed": 8.9985
     },
     {
@@ -43,7 +43,7 @@
       "t": 0.2,
       "want": "air",
       "got": "air",
-      "fov": 63.38288172757388,
+      "fov": 63.95747107873312,
       "speed": 20.174487192903413
     },
     {
@@ -51,7 +51,7 @@
       "t": 1.2,
       "want": "swing",
       "got": "swing",
-      "fov": 68.94053838904503,
+      "fov": 69.09344542984411,
       "speed": 27.308851111197775
     },
     {
@@ -59,18 +59,18 @@
       "t": 1.5,
       "want": "reel",
       "got": "reel",
-      "fov": 60.000030057126324,
+      "fov": 60.00004112279156,
       "speed": 10.033052336191599
     }
   ],
   "camera": {
     "idleFov": 60,
-    "fastFov": 68.99595015777663,
+    "fastFov": 68.9959892476031,
     "fastSpeed": 26.735487615749886,
-    "leanRollRad": 0,
+    "leanRollRad": 0.039730630467496454,
     "shakeTrauma": 0.14892527449269483
   },
-  "overlay": "fps        30   (33.34 ms avg, 34.4 ms p99)\nscale      1.00 x DPR 2\ngpu        11.10 ms\n  scene     5.13 ms\n  shadow    5.97 ms\ndraws      123   tris 84k\nmode       ground   0.0 m/s   gas 40.0\npos        -12.0, 20.8, -69.4\nadapter    apple metal-3",
+  "overlay": "fps        60   (16.66 ms avg, 18.6 ms p99)\nscale      1.00 x DPR 2\ngpu        9.69 ms\n  scene     4.61 ms\n  shadow    5.08 ms\ndraws      123   tris 84k\nmode       ground   0.0 m/s   gas 40.0\npos        -12.0, 20.8, -69.4\nadapter    apple metal-3",
   "tuningExport": "| Group | Constant | Before | After | Unit |\n|---|---|---|---|---|\n| World | Gravity (chosen within spec range 9.81 to 20) (`gravity`) | 16 | 14.5 | m/s² |",
   "controls": {
     "run": {
@@ -78,8 +78,8 @@
       "pose": "run"
     },
     "left": 2.0614838937982727,
-    "right": 2.3335404157838844,
-    "back": 2.0614838937982682,
+    "right": 2.0614838937982745,
+    "back": 2.1364713937982662,
     "jumpVy": 4.851043020367211,
     "hookL": "flying",
     "hookLHeld": "attached",
@@ -92,12 +92,12 @@
       "gasBefore": 40,
       "gasAfter": 39.7499999999998,
       "restBefore": [
-        34.61719951258857,
-        34.61719952309918
+        34.54224739709359,
+        34.54224740767279
       ],
       "restAfter": [
-        11.367199512588561,
-        11.367199523079227
+        11.292247397093586,
+        11.29224740765251
       ]
     },
     "release": [
@@ -105,7 +105,7 @@
       "stowed"
     ],
     "boost": {
-      "gas": 38.94999999999982,
+      "gas": 38.941666666666485,
       "thrusting": true
     },
     "reset": 0,
@@ -315,7 +315,7 @@
           -3.7069934809621836
         ]
       },
-      "steam": 196
+      "steam": 191
     },
     "insideTitan:body-slash": 0,
     "insideTitan:grab-escape": 0,
@@ -330,7 +330,7 @@
         "supplying": false,
         "marker": {
           "kind": "hit",
-          "at": 4386.200000000186
+          "at": 2853.4000000003725
         },
         "crosshair": "in"
       },
@@ -342,7 +342,7 @@
         "supplying": false,
         "marker": {
           "kind": "kill",
-          "at": 4905.5999999996275
+          "at": 3120.5999999996275
         },
         "crosshair": "in"
       },
@@ -475,12 +475,12 @@
       "crosshair": "in",
       "hook": {
         "state": "attached",
-        "part": 3
+        "part": 1
       },
       "slash": 1,
       "grabbed": true,
       "escaped": true,
-      "mashMs": 448
+      "mashMs": 485
     },
     "audio": {
       "slash-swish": 3,
